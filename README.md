@@ -129,6 +129,59 @@ Deployment order: Convex backend → production Convex URL → Sites production 
 
 After publishing, the skill polls the deployment until success or failure, uses the exact successful deployment URL, and confirms it against `get_site.current_live_url`. For an already-published Site, it reads `project_id` from `.openai/hosting.json` and uses `get_site.current_live_url` as canonical. It never guesses a URL from the slug.
 
+### Deploy Convex for development
+
+Use a development backend while building:
+
+```bash
+npm install
+npx convex dev --once
+```
+
+This pushes the backend once, generates the API types, and writes the development Convex URL to `.env.local`. During an interactive preview, keep this running beside one Sites server:
+
+```bash
+npx convex dev
+```
+
+Accountless local agent development does not require a Convex account. Do not use this development backend for the published Site.
+
+### Deploy Convex to production
+
+After local reads, writes, and realtime updates pass:
+
+```bash
+npx convex deploy
+```
+
+This deploys to the production deployment for the configured Convex project. A developer needs access to that Convex project, or a production-scoped deploy key. Configure backend secrets in the production Convex environment, obtain the production Convex URL, set it as the public Convex URL for the Sites production build, and build again before publishing Sites.
+
+The production Sites bundle must point to the production Convex URL—not localhost and not a Convex development deployment.
+
+### Publish without requiring visitors to sign in
+
+Ask Codex:
+
+```text
+$codex-sites-convex Build, validate, and publish the latest version to Codex Sites. Make the Site public so anyone with the link can use it without signing in.
+```
+
+Codex must explain that `public` allows anyone with the URL to visit and obtain your authorization before it publishes publicly or changes existing access. Workspace policy may prevent public publishing; if so, Codex should report that blocker instead of weakening another setting.
+
+### Publish with sign-in required
+
+Choose the audience in your prompt:
+
+```text
+$codex-sites-convex Build, validate, and publish the latest version to Codex Sites for all active members of my ChatGPT/OpenAI workspace.
+
+$codex-sites-convex Build, validate, and publish the latest version to Codex Sites. Keep it private and grant access to alex@example.com.
+
+$codex-sites-convex Build, validate, and publish the latest version to Codex Sites for owners and administrators only.
+```
+
+The corresponding access modes are `workspace_all`, `custom`, and `admins_only`. Private visitors open the returned Sites URL and sign in with the authorized ChatGPT/OpenAI account. Signing in to Convex does not grant Site access.
+
 Sites access is separate from Convex developer access:
 
 | Access mode | Who can visit? |
@@ -140,7 +193,7 @@ Sites access is separate from Convex developer access:
 
 Visitors never need Convex accounts. Developers need a Convex account only to manage or publish the cloud backend. Signing in to the Convex dashboard does not grant access to a private Site.
 
-The skill never makes a Site public or adds users or groups without explicit authorization. Adding an email to a custom allowlist grants access but does not send an invitation email.
+The skill never makes a Site public or adds users or groups without explicit authorization. For `custom` access, it preserves the complete existing allowlist when adding users. Adding an email grants access but does not send an invitation email.
 
 For future updates, ask Codex: ‘Build, validate, and publish the latest version to Codex Sites.’
 

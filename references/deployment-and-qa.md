@@ -2,6 +2,14 @@
 
 Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
 
+## Contents
+
+- Convex development and production
+- Sites publishing and access choice
+- New and existing Site deployment
+- Access changes and private login
+- Production QA and response templates
+
 ## Before deployment
 
 - Confirm no unrelated user changes will be overwritten.
@@ -11,18 +19,64 @@ Deployment order: Convex backend → production Convex URL → Sites production 
 - Confirm `.env.local` contains a nonempty `NEXT_PUBLIC_CONVEX_URL` before starting Sites.
 - Confirm third-party secrets exist only in Convex environment variables.
 
+## Convex development and production
+
+### Local or development backend
+
+Use this while building and testing. It is not the backend for the published Site.
+
+1. Install dependencies.
+2. Run `npx convex dev --once` to configure a development backend, push functions once, generate API types, and write the development deployment URL to `.env.local`.
+3. Verify the frontend's public Convex URL variable is present. For this Sites starter it is normally `NEXT_PUBLIC_CONVEX_URL`; follow the actual starter convention if different.
+4. During an interactive preview, keep `npx convex dev` running beside exactly one Sites development server.
+5. Verify development reads, writes, and realtime updates.
+
+Accountless agent development may use a local backend without a Convex account. A cloud development deployment requires a Convex project and suitably scoped credentials.
+
+### Production backend
+
+Use this only after development checks pass:
+
+1. Confirm the developer is authenticated to the intended Convex project, or that a production-scoped `CONVEX_DEPLOY_KEY` is configured for the deployment workflow.
+2. Configure production-only backend environment variables in Convex. Local `.env.local` values are not automatically backend environment variables. Use the dashboard or `npx convex env set --prod NAME`, without exposing secret values in logs or browser variables.
+3. Run `npx convex deploy`. This deploys to the project's production deployment when the local project is configured through `CONVEX_DEPLOYMENT`; when `CONVEX_DEPLOY_KEY` is set, it deploys to the deployment scoped by that key.
+4. Capture the production Convex URL returned by the deployment workflow or deployment settings.
+5. Configure the Sites production-build public environment variable with that production URL.
+6. Run a clean frontend production build. Inspect the built configuration and ensure it does not reference a local or development Convex URL.
+
+Never use `npx convex dev` as the production deployment step, and never publish a Sites bundle connected to a development backend.
+
+## Choose who can open the Codex Site
+
+Resolve and explain the access choice before calling a Sites deployment or access-update tool:
+
+- **No sign-in for visitors:** use `public`. Anyone with the URL can open the Site. Public publishing is an external side effect and requires explicit user authorization.
+- **Sign-in required for all workspace members:** use `workspace_all`. Visitors sign in with an active ChatGPT/OpenAI account in that workspace.
+- **Sign-in required for selected people or groups:** use `custom`. Visitors sign in with the explicitly allowed ChatGPT/OpenAI account. Adding an email grants access but sends no invitation email.
+- **Owner/admin access only:** use `admins_only`.
+
+If the user has not requested public access, publish privately with the existing access policy. Do not silently choose `public`. Sites sign-in controls access to the frontend; application authentication controls what a signed-in visitor can do inside the product. Neither requires the visitor to own a Convex account.
+
+Example intent mapping:
+
+- “Publish this so anyone with the link can use it without logging in” → explain `public`, request/confirm authorization, then publish or update access as public.
+- “Publish this only for my workspace” → use `workspace_all`.
+- “Share this only with alex@example.com” → inspect existing `custom` access, explain the full resulting allowlist, obtain authorization, then pass the complete existing-plus-desired allowlist to `update_site_access`.
+- “Publish it privately” with no audience specified → preserve the current private policy or use the private deployment path; report who can access it.
+
 ## Publish a new version
 
 1. Deploy Convex functions and schema with the current Convex deployment workflow.
 2. Obtain and record the production Convex URL. A Convex cloud project/account is required for developers managing or publishing this backend.
 3. Configure the Sites production-build environment with that public URL.
 4. Stop stale development bundles and rebuild the frontend cleanly with the production URL.
-5. Publish with the Sites hosting workflow and retain the deployment identifier.
-6. Poll `get_deployment_status` until it returns `succeeded` or `failed`. Do not treat an intermediate state as completion.
-7. On success, require a non-null deployment `url` and use that exact value. Never guess, derive, or reconstruct a URL from a slug.
-8. Read `project_id` from `.openai/hosting.json`, call `get_site`, and confirm that `current_live_url` matches the successful deployment `url`. Also inspect and report the current access configuration.
-9. Open the exact deployed URL in Codex.
-10. Complete production QA, then return the clickable Sites URL as the first item in the final answer.
+5. Resolve the desired access mode. Prefer the private deployment path when public access was not explicitly authorized. If public or shared deployment requires approval, state the resolved access level and wait for authorization.
+6. Publish with the Sites hosting workflow and retain the deployment identifier.
+7. Poll `get_deployment_status` until it returns `succeeded` or `failed`. Do not treat an intermediate state as completion.
+8. On success, require a non-null deployment `url` and use that exact value. Never guess, derive, or reconstruct a URL from a slug.
+9. Read `project_id` from `.openai/hosting.json`, call `get_site`, and confirm that `current_live_url` matches the successful deployment `url`. Also inspect and report the current access configuration.
+10. Open the exact deployed URL in Codex.
+11. Complete production QA, then return the clickable Sites URL as the first item in the final answer.
 
 If deployment fails, report the failed status and useful error details. Do not present an older URL as the new deployment.
 
@@ -123,5 +177,8 @@ Sources:
 
 - https://openai.com/academy/chatgpt-sites/
 - https://docs.convex.dev/production/overview
+- https://docs.convex.dev/cli/reference/dev
+- https://docs.convex.dev/cli/reference/deploy
+- https://docs.convex.dev/client/react/deployment-urls
 - https://docs.convex.dev/ai/convex-mcp-server
 - https://docs.convex.dev/cli/agent-mode

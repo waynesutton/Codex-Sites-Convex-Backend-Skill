@@ -71,6 +71,11 @@ After provisioning, run `scripts/check-backend-ready.sh`. Do not start the Sites
 
 For an interactive preview, keep `npx convex dev` running alongside Sites after the initial provisioning succeeds. Do not overwrite existing environment files. Keep `.env.local` ignored and `.env.example` limited to public names without values.
 
+Treat Convex development and production as separate targets:
+
+- **Development:** use `npx convex dev --once` to provision/push once, then keep `npx convex dev` running for an interactive preview. The frontend uses the development URL written to `.env.local`.
+- **Production:** after development validation, use `npx convex deploy`. Capture the production deployment URL and rebuild Sites with that URL; never publish a bundle connected to the development deployment.
+
 ### 4. Complete the official capability check
 
 Before implementing any product capability:
@@ -161,6 +166,8 @@ If a hydration warning mentions attributes injected by Grammarly or another brow
 Read and follow [references/deployment-and-qa.md](references/deployment-and-qa.md) completely.
 
 Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
+
+Before publishing, resolve whether the Site should be public or require sign-in. Default to private when the user has not requested public access. Explain the resolved access mode and obtain explicit authorization before public publishing or any access-list change.
 
 Poll the Sites deployment to success or failure, use only its exact returned `url`, then call `get_site` to confirm `current_live_url` and access. Open the deployed URL in Codex and make its clickable link the first item in the final answer. For an existing Site, read `project_id` from `.openai/hosting.json`, call `get_site`, and treat `current_live_url` as canonical; never reconstruct a URL from a slug.
 
