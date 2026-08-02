@@ -1,0 +1,4 @@
+interface:
+  display_name: "Codex Sites + Convex"
+  short_description: "Build Sites frontends with Convex backends"
+  default_prompt: "Use $codex-sites-convex to build and deploy a Codex Site backed by Convex."
