@@ -135,6 +135,32 @@ $codex-sites-convex Remove the “Built with Codex Sites + Convex” footer and 
 
 See the official [Convex Agent Mode documentation](https://docs.convex.dev/cli/agent-mode).
 
+## Reliable local startup
+
+Provision Convex before starting the Sites development server:
+
+```bash
+npm install
+npx convex dev --once
+./scripts/check-backend-ready.sh .
+```
+
+After the readiness check passes:
+
+1. Start `npx convex dev` and keep it running.
+2. Start exactly one Sites development server on its intended port.
+3. Open the browser only after both processes are healthy.
+
+The readiness check requires:
+
+- `.env.local` exists;
+- `NEXT_PUBLIC_CONVEX_URL` has a nonempty value;
+- generated Convex API types exist.
+
+If Sites started before Convex wrote `.env.local`, stop Sites and restart it exactly once. The running client bundle will not reliably receive an environment variable created after startup.
+
+Do not force a Convex login for local agent development and do not use legacy anonymous-mode flags. In a non-interactive shell, `npx convex dev --once` automatically provisions the supported accountless local backend.
+
 ## Official component discovery
 
 Before adding backend infrastructure, the skill checks:
@@ -186,6 +212,20 @@ Checks the required Sites and Convex structure, generated API, dependency bounda
 ```
 
 Confirms `NEXT_PUBLIC_CONVEX_URL` and generated API types exist before the Sites server or browser starts.
+
+## Troubleshooting
+
+| Symptom | Likely cause | Correct response |
+| --- | --- | --- |
+| Missing Convex URL or setup screen | Sites started before `.env.local` existed | Provision Convex, pass the readiness check, then restart Sites once |
+| JSON parsing, worker startup, or repeated Vite restart errors | Environment, dependencies, and hosting configuration changed while Vite was restarting | Let file changes settle, stop duplicate servers, and perform one clean restart |
+| Sites moves to a fallback port | Another Sites server is still running | Reuse the healthy intended server or stop the duplicate started by the current task |
+| “Multiple renderers” appears during overlapping restarts | Cascading development-server state | Resolve duplicate processes and restart cleanly before changing app code |
+| Hydration warning mentions Grammarly-injected attributes | Browser extension modified the DOM | Verify in a clean Chrome profile or with extensions disabled; do not change the app if it disappears |
+| React crashes because the Convex URL is missing | Provider initialization throws during render | Render a helpful configuration state and create the Convex client only after the URL exists |
+| Local backend works but published Site does not | Production bundle used the local or stale Convex URL | Deploy Convex, set the production URL, and run a clean Sites production build before publishing |
+
+Never accept a fallback port or local-only success as proof that the published integration works. Final QA must confirm production reads, writes, and realtime updates from the published Sites URL.
 
 ## Project structure
 
