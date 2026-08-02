@@ -24,6 +24,8 @@ Without a dedicated workflow, an agent can scaffold a second frontend, introduce
 - Component-specific skill loading when a component is selected
 - Convex schema, validator, index, authorization, and pagination rules
 - A deployed HTTPS and WebSocket connectivity gate
+- Accountless local Agent Mode and isolated cloud-agent guidance
+- A backend-readiness gate before Sites or the browser starts
 - Production deployment ordering and Chrome QA
 - A removable “Built with Codex Sites + Convex” footer using the bundled official artwork
 - Deterministic preflight and project verification scripts
@@ -111,14 +113,27 @@ $codex-sites-convex Remove the “Built with Codex Sites + Convex” footer and 
 ## How the workflow works
 
 1. **Inspect** — Classify the workspace as empty, Sites-only, Convex-only, or already combined.
-2. **Preserve Sites** — Keep the existing `.openai/hosting.json`, package manager, vinext/Vite structure, and frontend workflow.
-3. **Initialize Convex** — Add Convex to the same project and install current Convex AI guidance.
+2. **Prepare Sites** — Keep the existing `.openai/hosting.json`, package manager, and vinext/Vite structure, but defer starting the server.
+3. **Provision Convex** — Use accountless `npx convex dev --once` locally or an isolated scoped cloud-agent deployment when required.
 4. **Check capabilities** — Refresh the official component catalog and `llms.txt` before implementation.
 5. **Load component instructions** — Read the complete official component `SKILL.md` when one is selected.
-6. **Prove connectivity** — Test a minimal query, mutation, and realtime update from the published Sites origin.
-7. **Build** — Implement the requested product with generated APIs, real Convex-backed data, and the removable built-with footer.
-8. **Validate** — Run Convex generation, backend checks, frontend build, lint, type checks, and structural verification.
-9. **Publish** — Deploy Convex, configure the public deployment URL, publish the Site, and test it in Chrome.
+6. **Gate startup** — Require `.env.local`, `NEXT_PUBLIC_CONVEX_URL`, and generated APIs before starting exactly one Sites server.
+7. **Prove connectivity** — Test a minimal query, mutation, and realtime update from the published Sites origin.
+8. **Build** — Implement the requested product with generated APIs, real Convex-backed data, and the removable built-with footer.
+9. **Validate** — Run Convex generation, backend checks, frontend build, lint, type checks, and structural verification.
+10. **Publish** — Deploy Convex, rebuild with the production Convex URL, publish the Site, and test it in Chrome.
+
+## Convex Agent Mode and accounts
+
+| Context | What the skill uses | Convex account required? |
+| --- | --- | --- |
+| Local agent development | `npx convex dev --once` provisions an accountless local backend | No |
+| Interactive local preview | Keep `npx convex dev` running beside one Sites server | No for a local backend |
+| Cloud-agent development | Isolated cloud dev deployment with a deployment-scoped key | Yes |
+| Production publishing | Convex cloud project and production deployment | Yes |
+| Site visitors | Public Convex client connection | No, unless the product itself adds authentication |
+
+See the official [Convex Agent Mode documentation](https://docs.convex.dev/cli/agent-mode).
 
 ## Official component discovery
 
@@ -164,6 +179,14 @@ Refreshes the official Convex catalog and returns relevant backend candidates.
 
 Checks the required Sites and Convex structure, generated API, dependency boundary, and obvious credential risks.
 
+### Backend readiness
+
+```bash
+./scripts/check-backend-ready.sh /path/to/project
+```
+
+Confirms `NEXT_PUBLIC_CONVEX_URL` and generated API types exist before the Sites server or browser starts.
+
 ## Project structure
 
 ```text
@@ -176,6 +199,7 @@ codex-sites-convex/
 │   └── convex-color.svg
 ├── references/
 │   ├── architecture.md
+│   ├── agent-mode.md
 │   ├── bootstrap.md
 │   ├── built-with-footer.md
 │   ├── components.md
@@ -183,6 +207,7 @@ codex-sites-convex/
 │   ├── convex-rules.md
 │   └── deployment-and-qa.md
 └── scripts/
+    ├── check-backend-ready.sh
     ├── check-components.sh
     ├── preflight.sh
     └── verify-project.sh
@@ -193,7 +218,8 @@ codex-sites-convex/
 - Codex desktop app or Codex CLI with skill support
 - A ChatGPT workspace with Codex Sites enabled
 - Node.js, npm, and `npx`
-- A Convex account for hosted development and production deployments
+- No Convex account for accountless local agent development
+- A Convex account for isolated cloud deployments and production publishing
 - Chrome for final published-site verification
 
 ## Recommended Convex setup
@@ -314,6 +340,7 @@ The skill requires Codex to:
 - [`npx convex deploy`](https://docs.convex.dev/cli/reference/deploy)
 - [`npx convex codegen`](https://docs.convex.dev/cli/reference/codegen)
 - [`npx convex mcp`](https://docs.convex.dev/cli/reference/mcp)
+- [Convex Agent Mode](https://docs.convex.dev/cli/agent-mode)
 
 ## Contributing
 

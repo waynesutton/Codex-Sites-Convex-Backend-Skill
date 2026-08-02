@@ -26,7 +26,7 @@ Before implementing a capability, also refresh the official component catalog at
 | Environment variables | https://docs.convex.dev/production/environment-variables |
 | Production deployment | https://docs.convex.dev/production/overview |
 | Migrations and schema evolution | https://docs.convex.dev/database/schemas |
-| Agent mode | https://docs.convex.dev/cli/agent-mode |
+| Agent Mode: accountless local and isolated cloud agents | https://docs.convex.dev/cli/agent-mode |
 | MCP server | https://docs.convex.dev/ai/convex-mcp-server |
 | Codex integration | https://docs.convex.dev/ai/using-codex |
 | Components overview | https://docs.convex.dev/components/overview |

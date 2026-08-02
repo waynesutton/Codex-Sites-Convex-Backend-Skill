@@ -3,12 +3,17 @@
 ## New empty workspace
 
 1. Initialize the Sites starter with the installed Sites workflow.
-2. Start its development server and preserve the printed URL.
+2. Do not start the Sites server yet.
 3. Install `convex` in the same package.
-4. Run `npx convex dev` for an interactive hosted development deployment.
+4. Run `npx convex dev --once` in the non-interactive agent shell to provision an accountless local backend.
 5. Run `npx convex ai-files install`.
-6. Add `ConvexProvider` using the starter's supported public environment-variable convention.
-7. Build the vertical connection test before product features.
+6. Verify `.env.local` contains a nonempty `NEXT_PUBLIC_CONVEX_URL` and generated API types exist.
+7. Add a guarded `ConvexProvider` that renders a helpful setup state instead of throwing when the URL is absent.
+8. Start exactly one Sites server after backend readiness passes.
+9. Keep `npx convex dev` running alongside Sites for the interactive preview.
+10. Build the vertical connection test before product features.
+
+If Sites was already running when Convex created or changed `.env.local`, stop it and restart exactly once. Do not accept a fallback port.
 
 ## Existing Sites project
 
@@ -36,3 +41,5 @@ codex plugin add convex@convex-codex-plugin
 ```
 
 Source: https://docs.convex.dev/ai/using-codex
+
+Agent mode: https://docs.convex.dev/cli/agent-mode

@@ -25,6 +25,11 @@ done
 [[ -d convex ]] && echo "FOUND: convex backend" || echo "NOT FOUND: convex/"
 [[ -f convex/_generated/api.d.ts || -f convex/_generated/api.js ]] && echo "FOUND: generated Convex API" || echo "NOT FOUND: generated Convex API"
 [[ -f AGENTS.md ]] && echo "FOUND: AGENTS.md" || echo "NOT FOUND: AGENTS.md"
+if [[ -f .env.local ]] && rg -q '^NEXT_PUBLIC_CONVEX_URL=.+$' .env.local; then
+  echo "FOUND: NEXT_PUBLIC_CONVEX_URL"
+else
+  echo "NOT FOUND: NEXT_PUBLIC_CONVEX_URL"
+fi
 
 if [[ -f package-lock.json ]]; then
   echo "PACKAGE MANAGER: npm"

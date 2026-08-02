@@ -22,6 +22,13 @@ check_file package.json
 check_file .openai/hosting.json
 check_file convex
 
+if [[ -f .env.local ]] && rg -q '^NEXT_PUBLIC_CONVEX_URL=.+$' .env.local; then
+  echo "OK: NEXT_PUBLIC_CONVEX_URL"
+else
+  echo "MISSING: nonempty NEXT_PUBLIC_CONVEX_URL in .env.local"
+  failures=$((failures + 1))
+fi
+
 if [[ -f package.json ]] && rg -q '"convex"[[:space:]]*:' package.json; then
   echo "OK: convex dependency"
 else
