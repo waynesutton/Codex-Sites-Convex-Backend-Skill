@@ -14,14 +14,19 @@
 
 The browser receives only the public Convex deployment URL and user-facing configuration. It imports generated types from `convex/_generated/api` and connects through `ConvexProvider`.
 
+```text
+Visitor browser
+→ Codex Sites frontend
+→ NEXT_PUBLIC_CONVEX_URL
+→ Convex Cloud deployment
+→ Convex queries, mutations, actions, and data
+```
+
+See [sites-settings-and-environment.md](sites-settings-and-environment.md) for Sites management, environment layers, hosting metadata, and update runbooks.
+
 ## Account boundaries
 
-| Context | Convex account requirement |
-| --- | --- |
-| Accountless local agent development | No account; `npx convex dev --once` provisions a local backend |
-| Cloud-agent development | Use an isolated cloud dev deployment and deployment-scoped key when cloud-only capabilities are required |
-| Production publishing | A Convex cloud project/account is required |
-| Site visitors | No Convex account; product authentication is separate and only added when requested |
+See [accounts-access-and-ownership.md](accounts-access-and-ownership.md) for the account matrix, safe credential detection, ownership rules, Sites access, and application authentication. The essential boundary is: Sites controls who can open the frontend; Convex application authorization controls which data an app user can read or change.
 
 ## Current integration gate
 

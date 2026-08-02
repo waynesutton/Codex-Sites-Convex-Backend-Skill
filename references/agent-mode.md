@@ -2,6 +2,8 @@
 
 Read the current official page before provisioning: https://docs.convex.dev/cli/agent-mode.
 
+Read [accounts-access-and-ownership.md](accounts-access-and-ownership.md) before deciding whether the environment is accountless, using saved developer credentials, or using a scoped key.
+
 ## Select the correct mode
 
 | Mode | Setup | Account/key |
@@ -26,6 +28,8 @@ npx convex dev --once
 Do not force login. Do not use the legacy `CONVEX_AGENT_MODE=anonymous` flag. Full network access may be required the first time to download the local backend binary.
 
 Local mode is best for ephemeral development that does not require inbound public webhooks, dashboard access, or cloud-only integrations.
+
+The local backend runs as a subprocess of `npx convex dev` and stops when that process stops. It cannot serve a published Codex Site. Never infer accountless mode only from the absence of a login prompt; saved CLI credentials may have been reused.
 
 ## Cloud-agent development
 

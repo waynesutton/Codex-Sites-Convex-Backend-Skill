@@ -2,6 +2,10 @@
 
 Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
 
+Apply the account matrix, credential-detection rules, public-data warning, and accountless-to-production handoff in [accounts-access-and-ownership.md](accounts-access-and-ownership.md).
+
+Apply the hosted management, environment-layer, and update rules in [sites-settings-and-environment.md](sites-settings-and-environment.md).
+
 ## Contents
 
 - Convex development and production
@@ -146,12 +150,18 @@ Sharing or widening access is an external side effect. Ask before changing the a
 - [ ] The current access mode is reported accurately.
 - [ ] Private login requirements are explained when applicable.
 - [ ] The user is told that visitors do not need Convex accounts.
+- [ ] The handoff names the production deployment type and who can manage it without exposing credentials.
+- [ ] The handoff states whether app data is shared or isolated by authenticated user.
+- [ ] A new developer is told what account, project selection, or scoped key is required before a future backend deployment.
 - [ ] Reads, writes, and realtime updates work through production Convex.
 - [ ] The final response begins with the clickable Sites URL and includes the future-update instruction.
+- [ ] The final response explains how to reopen the Site in ChatGPT Sites and manage it through Settings.
 
 ## Required final-response templates
 
 Use the applicable template after all checks pass. The clickable URL must be the first item in the response.
+
+After the opening paragraph, add: the exact Sites access mode; whether ChatGPT/OpenAI sign-in is required; production Convex deployment type; backend owner or manager; whether data is shared or isolated; and what a new developer needs for the next backend deployment. Never include credentials.
 
 ### Private Site
 
@@ -161,6 +171,8 @@ It is private. Open the link and sign in with an authorized ChatGPT/OpenAI accou
 
 For future updates, ask Codex: ‘Build, validate, and publish the latest version to Codex Sites.’
 
+To manage this Site later, open Sites in ChatGPT or visit https://chatgpt.com/sites, select the Site, then open Settings.
+
 ### Public Site
 
 Your Site is live: [Open the Site](SITE_URL)
@@ -168,6 +180,8 @@ Your Site is live: [Open the Site](SITE_URL)
 It is public, so anyone with the link can visit without signing in or creating a Convex account.
 
 For future updates, ask Codex: ‘Build, validate, and publish the latest version to Codex Sites.’
+
+To manage this Site later, open Sites in ChatGPT or visit https://chatgpt.com/sites, select the Site, then open Settings.
 
 For `workspace_all`, `custom`, or `admins_only`, use the private template and add the precise access explanation returned by `get_site`. Every successful handoff must include this exact sentence:
 

@@ -19,6 +19,8 @@ Build the complete application, validate both halves, and publish it unless the 
 ## Load only the references needed
 
 - Always read [references/architecture.md](references/architecture.md).
+- Before selecting a Convex environment or explaining accounts, access, ownership, or authentication, read [references/accounts-access-and-ownership.md](references/accounts-access-and-ownership.md).
+- Before publishing or changing a published Site, hosted environment variable, connected Convex deployment, or sharing setting, read [references/sites-settings-and-environment.md](references/sites-settings-and-environment.md).
 - For a new project, read [references/bootstrap.md](references/bootstrap.md).
 - Before provisioning any development backend, read [references/agent-mode.md](references/agent-mode.md).
 - Before editing `convex/`, read [references/convex-rules.md](references/convex-rules.md).
@@ -34,6 +36,8 @@ If the installed `sites:sites-building`, `sites:sites-hosting`, `convex:convex-e
 ### 1. Inspect before changing anything
 
 Run `scripts/preflight.sh` from the target project root. Inspect `AGENTS.md`, `.openai/hosting.json`, `package.json`, the lockfile, `app/`, `convex/`, and `.env.example` when present. Preserve the existing package manager and working structure.
+
+Classify `CONVEX_DEPLOYMENT`, the presence and scope of `CONVEX_DEPLOY_KEY`, saved Convex CLI user configuration, and the public Convex URL without printing credentials or configuration contents. No login prompt does not prove accountless mode; saved CLI credentials may already be active.
 
 Classify the task:
 
@@ -142,6 +146,7 @@ Propose schema changes before implementing them. Then build the smallest coheren
 - Use Convex file storage, schedules, search, or an approved official component only when the requested feature needs it.
 - Keep UI data real and backed by Convex; do not ship placeholders.
 - Never throw during React render when `NEXT_PUBLIC_CONVEX_URL` is missing. Render a clear configuration/setup state and construct `ConvexReactClient` only after a valid URL exists.
+- Keep developer account and deployment setup out of normal visitor UI. If a public Site lacks product authentication and per-user authorization, warn that visitors share Convex data before requesting authorization to publish publicly.
 
 Add the removable “Built with Codex Sites + Convex” footer from [references/built-with-footer.md](references/built-with-footer.md) unless the user explicitly asks to omit or remove it. Use the bundled logo assets, link each brand to its official site, and preserve the removal comment in source code.
 
@@ -169,7 +174,11 @@ Deployment order: Convex backend → production Convex URL → Sites production 
 
 Before publishing, resolve whether the Site should be public or require sign-in. Default to private when the user has not requested public access. Explain the resolved access mode and obtain explicit authorization before public publishing or any access-list change.
 
+An accountless local backend cannot power a published Site. Before production deployment, confirm the intended Convex team, project, production deployment, and authorized account or production-scoped key. Reject any production bundle containing localhost, `127.0.0.1`, a local URL, or an unintended development deployment.
+
 Poll the Sites deployment to success or failure, use only its exact returned `url`, then call `get_site` to confirm `current_live_url` and access. Open the deployed URL in Codex and make its clickable link the first item in the final answer. For an existing Site, read `project_id` from `.openai/hosting.json`, call `get_site`, and treat `current_live_url` as canonical; never reconstruct a URL from a slug.
+
+Every published handoff must explain how to reopen the Site in ChatGPT Sites and manage it through Settings. Hosted Site management is not available through a standalone Codex CLI or IDE screen.
 
 Do not enable production MCP writes, generate a sign-in bypass token, make a Site public, or add users or groups unless the user explicitly authorizes that action.
 
@@ -185,4 +194,5 @@ Finish only when:
 - no browser bundle contains a secret;
 - the removable built-with footer is present unless the user explicitly opted out;
 - the published connection was tested when publishing was requested;
+- the handoff states Sites access, visitor sign-in, Convex backend ownership, production deployment type, shared versus per-user data, and future developer requirements without exposing credentials;
 - the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker.

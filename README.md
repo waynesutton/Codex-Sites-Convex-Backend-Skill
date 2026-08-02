@@ -44,6 +44,80 @@ flowchart LR
 
 The Convex MCP server helps Codex during development. Visitors use the public Convex React client and generated API types.
 
+## Accounts, access, and ownership
+
+| Context | Account or key | Can power a published Site? |
+| --- | --- | --- |
+| Accountless local Agent Mode | No Convex login or deploy key | No; the local backend must keep running on the developer's machine |
+| Signed-in developer cloud dev | Saved Convex CLI credentials | No; use production for the published Site |
+| Isolated cloud agent dev | Deployment-scoped development key | No; the key is limited to that dev deployment |
+| Convex Cloud production | Convex project/account or production-scoped key | Yes |
+| Codex Sites visitors | Public access or authorized ChatGPT/OpenAI account | Visitors never need Convex accounts |
+| Product authentication | App-specific visitor identity | Controls shared versus per-user data inside the app |
+
+A Convex Pro plan is not required merely to publish. Codex Sites access controls who can open the frontend; application authentication and Convex authorization control which records a visitor can read or change. See [accounts, access, and ownership](references/accounts-access-and-ownership.md), [Agent Mode](references/agent-mode.md), and [deployment and QA](references/deployment-and-qa.md).
+
+## How Sites and Convex work together
+
+```text
+Visitor browser
+→ Codex Sites frontend
+→ NEXT_PUBLIC_CONVEX_URL
+→ Convex Cloud deployment
+→ Convex queries, mutations, actions, and data
+```
+
+Sites hosts the frontend. Convex hosts durable data and backend functions. `NEXT_PUBLIC_CONVEX_URL` is public configuration that tells `ConvexReactClient` where to connect; it is not a password and does not grant dashboard access. Generated API types describe callable functions, while Convex validators, authentication, and authorization protect backend operations.
+
+## Find your published Site
+
+In the ChatGPT desktop app, open Sites, find the Site, and select it. Open Settings to manage it or Analytics to review unique visitors and page views.
+
+On the web, open [chatgpt.com/sites](https://chatgpt.com/sites), find the Site, select More actions, then choose Settings or Analytics. The Site stays in this list after the original task or conversation ends.
+
+Hosted Sites are managed through ChatGPT on the web or desktop. There is no standalone Codex CLI or IDE management screen.
+
+## Manage Site settings
+
+- **Name:** display name.
+- **URL or domain:** hosted `chatgpt.site` address.
+- **Custom domain:** a domain or subdomain you already own.
+- **Sharing:** who can open the Site; it does not grant edit or Convex-backend access.
+- **Environment variables:** hosted frontend or Sites-worker configuration.
+- **Analytics:** unique visitors and page views.
+- **Delete Site:** permanent and cannot be undone.
+
+Settings can vary by plan, region, workspace policy, and the current Sites beta.
+
+## Environment variables
+
+| Layer | Location | Use |
+| --- | --- | --- |
+| Local frontend | `.env.local` | Local frontend configuration and local/development Convex URL; keep it out of Git |
+| Hosted Sites | Site → Settings → Environment variables | Hosted frontend or server-side Sites-worker configuration |
+| Convex deployment | Convex dashboard or CLI environment commands | Backend secrets and configuration used by Convex functions |
+
+Browser-public variables such as `NEXT_PUBLIC_CONVEX_URL` and `VITE_*` are visible to visitors even if a UI offers a Secret switch. Keep `CONVEX_DEPLOY_KEY` and third-party backend secrets out of browser variables. Convex development and production environments are separate, and Convex functions do not read the frontend's `.env.local`.
+
+`.openai/hosting.json` links the local source to the hosted Sites project. It may contain `project_id` and logical D1/R2 binding names, but never runtime environment values or secrets. Its `project_id` is a Sites identifier, not a Convex project ID.
+
+## Change the connected Convex deployment
+
+1. Confirm who owns the target Convex project and validate its production deployment.
+2. Copy the exact production `convex.cloud` URL.
+3. Update `NEXT_PUBLIC_CONVEX_URL` in Site Settings and the production build environment.
+4. Rebuild because browser-public values may be embedded in JavaScript.
+5. Save and deploy a new Sites version.
+6. Confirm the old URL is absent, then test reads, writes, and realtime updates.
+
+Never publish a Site connected to localhost, `127.0.0.1`, or an unintended development deployment. See [Sites settings and environment](references/sites-settings-and-environment.md) for all update runbooks and the full variable reference.
+
+## Public versus private access
+
+`public` lets anyone with the link open the Site without ChatGPT sign-in. `custom`, `workspace_all`, and `admins_only` require the corresponding authorized ChatGPT/OpenAI identity. Changing sharing affects only the Sites visitor gate; it does not deploy Convex, move data, change the Convex plan, or create Convex accounts.
+
+Before making an app public, verify product authentication and per-user Convex authorization. Without them, visitors may share and modify the same records. Public access and any audience expansion require explicit authorization.
+
 ## Installation
 
 ### Option 1: Install for your Codex user
@@ -312,6 +386,7 @@ codex-sites-convex/
 │   ├── codex-color.svg
 │   └── convex-color.svg
 ├── references/
+│   ├── accounts-access-and-ownership.md
 │   ├── architecture.md
 │   ├── agent-mode.md
 │   ├── bootstrap.md
@@ -319,7 +394,8 @@ codex-sites-convex/
 │   ├── components.md
 │   ├── convex-doc-map.md
 │   ├── convex-rules.md
-│   └── deployment-and-qa.md
+│   ├── deployment-and-qa.md
+│   └── sites-settings-and-environment.md
 └── scripts/
     ├── check-backend-ready.sh
     ├── check-components.sh
@@ -378,6 +454,8 @@ The skill requires Codex to:
 
 ## Official OpenAI and Codex resources
 
+- [ChatGPT Sites documentation](https://learn.chatgpt.com/docs/sites?surface=app)
+- [Manage Sites in ChatGPT](https://chatgpt.com/sites)
 - [OpenAI Academy: ChatGPT Sites](https://openai.com/academy/chatgpt-sites/)
 - [Codex overview](https://openai.com/codex/)
 - [Codex documentation](https://developers.openai.com/codex/)
