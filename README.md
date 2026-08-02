@@ -25,6 +25,7 @@ Without a dedicated workflow, an agent can scaffold a second frontend, introduce
 - Convex schema, validator, index, authorization, and pagination rules
 - A deployed HTTPS and WebSocket connectivity gate
 - Production deployment ordering and Chrome QA
+- A removable “Built with Codex Sites + Convex” footer using the bundled official artwork
 - Deterministic preflight and project verification scripts
 
 ## Architecture
@@ -101,6 +102,12 @@ $codex-sites-convex Review this Codex Sites + Convex app, fix backend issues, an
 
 Codex will inspect the workspace, preserve existing architecture, check current official Convex components and documentation, implement the smallest complete product, run validation, deploy Convex first, and publish the frontend through Codex Sites.
 
+Remove the optional footer at any time with this one-line prompt:
+
+```text
+$codex-sites-convex Remove the “Built with Codex Sites + Convex” footer and its unused logo assets, then run the frontend build.
+```
+
 ## How the workflow works
 
 1. **Inspect** — Classify the workspace as empty, Sites-only, Convex-only, or already combined.
@@ -109,7 +116,7 @@ Codex will inspect the workspace, preserve existing architecture, check current 
 4. **Check capabilities** — Refresh the official component catalog and `llms.txt` before implementation.
 5. **Load component instructions** — Read the complete official component `SKILL.md` when one is selected.
 6. **Prove connectivity** — Test a minimal query, mutation, and realtime update from the published Sites origin.
-7. **Build** — Implement the requested product with generated APIs and real Convex-backed data.
+7. **Build** — Implement the requested product with generated APIs, real Convex-backed data, and the removable built-with footer.
 8. **Validate** — Run Convex generation, backend checks, frontend build, lint, type checks, and structural verification.
 9. **Publish** — Deploy Convex, configure the public deployment URL, publish the Site, and test it in Chrome.
 
@@ -164,9 +171,13 @@ codex-sites-convex/
 ├── SKILL.md
 ├── agents/
 │   └── openai.yaml
+├── assets/
+│   ├── codex-color.svg
+│   └── convex-color.svg
 ├── references/
 │   ├── architecture.md
 │   ├── bootstrap.md
+│   ├── built-with-footer.md
 │   ├── components.md
 │   ├── convex-doc-map.md
 │   ├── convex-rules.md
@@ -222,6 +233,7 @@ The skill requires Codex to:
 - keep privileged credentials and third-party secrets out of browser code;
 - avoid speculative dependencies and duplicate infrastructure;
 - test the published frontend’s HTTPS and WebSocket connection;
+- include the removable built-with footer and preserve its source removal comment unless the user opts out;
 - ask before expanding access or enabling broad production MCP permissions.
 
 ## Official OpenAI and Codex resources

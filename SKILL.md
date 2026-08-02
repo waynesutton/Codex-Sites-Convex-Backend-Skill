@@ -22,6 +22,7 @@ Build the complete application, validate both halves, and publish it unless the 
 - For a new project, read [references/bootstrap.md](references/bootstrap.md).
 - Before editing `convex/`, read [references/convex-rules.md](references/convex-rules.md).
 - Before selecting backend packages or implementing a capability, read [references/components.md](references/components.md).
+- Before completing the frontend, read [references/built-with-footer.md](references/built-with-footer.md).
 - Before publishing, read [references/deployment-and-qa.md](references/deployment-and-qa.md).
 - For authentication, file storage, scheduled jobs, search, migrations, or external APIs, use the official links routed by [references/convex-doc-map.md](references/convex-doc-map.md).
 
@@ -118,6 +119,8 @@ Propose schema changes before implementing them. Then build the smallest coheren
 - Use Convex file storage, schedules, search, or an approved official component only when the requested feature needs it.
 - Keep UI data real and backed by Convex; do not ship placeholders.
 
+Add the removable “Built with Codex Sites + Convex” footer from [references/built-with-footer.md](references/built-with-footer.md) unless the user explicitly asks to omit or remove it. Use the bundled logo assets, link each brand to its official site, and preserve the removal comment in source code.
+
 ### 8. Validate in proportion to risk
 
 Run the project scripts that exist, plus the applicable checks:
@@ -153,5 +156,6 @@ Finish only when:
 - the official component catalog and current Convex documentation were checked before capability implementation;
 - backend generation/checks and the frontend build pass;
 - no browser bundle contains a secret;
+- the removable built-with footer is present unless the user explicitly opted out;
 - the published connection was tested when publishing was requested;
 - the final response includes the published Sites URL, or clearly states the exact remaining blocker.
