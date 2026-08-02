@@ -156,18 +156,15 @@ Fix failures and rerun the failing check. Do not declare completion from a local
 
 If a hydration warning mentions attributes injected by Grammarly or another browser extension, verify once in a clean Chrome profile or with extensions disabled. Do not change application code when the warning disappears and the server-rendered markup otherwise matches.
 
-### 10. Publish in dependency order
+### 10. Publish and hand off
 
-When the user wants a live result:
+Read and follow [references/deployment-and-qa.md](references/deployment-and-qa.md) completely.
 
-1. Deploy the Convex backend and confirm its production deployment URL. A Convex cloud project/account is required at this stage.
-2. Write the production Convex URL to the environment used by the Sites production build.
-3. Stop any stale development bundle and run a clean final frontend build with the production URL.
-4. Publish through the Sites hosting workflow.
-5. Test the published URL in Chrome for reads, writes, reactive updates, authentication, responsive layout, and error states.
-6. Return the Sites URL as the primary deliverable and explain any sharing action the user must take.
+Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
 
-Do not enable production MCP writes or share the Site with additional people unless the user authorizes that action.
+Poll the Sites deployment to success or failure, use only its exact returned `url`, then call `get_site` to confirm `current_live_url` and access. Open the deployed URL in Codex and make its clickable link the first item in the final answer. For an existing Site, read `project_id` from `.openai/hosting.json`, call `get_site`, and treat `current_live_url` as canonical; never reconstruct a URL from a slug.
+
+Do not enable production MCP writes, generate a sign-in bypass token, make a Site public, or add users or groups unless the user explicitly authorizes that action.
 
 ## Completion contract
 
@@ -181,4 +178,4 @@ Finish only when:
 - no browser bundle contains a secret;
 - the removable built-with footer is present unless the user explicitly opted out;
 - the published connection was tested when publishing was requested;
-- the final response includes the published Sites URL, or clearly states the exact remaining blocker.
+- the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker.

@@ -121,7 +121,28 @@ $codex-sites-convex Remove the “Built with Codex Sites + Convex” footer and 
 7. **Prove connectivity** — Test a minimal query, mutation, and realtime update from the published Sites origin.
 8. **Build** — Implement the requested product with generated APIs, real Convex-backed data, and the removable built-with footer.
 9. **Validate** — Run Convex generation, backend checks, frontend build, lint, type checks, and structural verification.
-10. **Publish** — Deploy Convex, rebuild with the production Convex URL, publish the Site, and test it in Chrome.
+10. **Publish** — Deploy Convex, rebuild with the production Convex URL, publish the Site, verify its exact URL and access policy, and test it in Chrome.
+
+Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
+
+## Publishing, URLs, and access
+
+After publishing, the skill polls the deployment until success or failure, uses the exact successful deployment URL, and confirms it against `get_site.current_live_url`. For an already-published Site, it reads `project_id` from `.openai/hosting.json` and uses `get_site.current_live_url` as canonical. It never guesses a URL from the slug.
+
+Sites access is separate from Convex developer access:
+
+| Access mode | Who can visit? |
+| --- | --- |
+| `public` | Anyone with the URL, without signing in |
+| `workspace_all` | Active workspace members signed in with their ChatGPT/OpenAI workspace account |
+| `custom` | Explicitly allowed users and groups |
+| `admins_only` | The owner or administrators |
+
+Visitors never need Convex accounts. Developers need a Convex account only to manage or publish the cloud backend. Signing in to the Convex dashboard does not grant access to a private Site.
+
+The skill never makes a Site public or adds users or groups without explicit authorization. Adding an email to a custom allowlist grants access but does not send an invitation email.
+
+For future updates, ask Codex: ‘Build, validate, and publish the latest version to Codex Sites.’
 
 ## Convex Agent Mode and accounts
 
