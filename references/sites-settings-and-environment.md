@@ -107,7 +107,7 @@ Hard rules:
 
 ## Keep `.openai/hosting.json` metadata-only
 
-`.openai/hosting.json` links the local project to its hosted Sites project. It may contain:
+`.openai/hosting.json` is the local hosting manifest. Its presence alone does not prove that a hosted Site was registered. It may contain:
 
 - `project_id`;
 - a logical D1 binding name;
@@ -120,7 +120,14 @@ It must not contain:
 - third-party secrets;
 - hosted runtime environment values.
 
-`project_id` identifies the Sites project. It is not a Convex project ID and does not connect the user's Convex account.
+A valid nonempty `project_id` identifies the registered Sites project. Confirm it with `get_site`; it is not a Convex project ID and does not connect the user's Convex account. Registration does not prove that a build was saved as a version or deployed.
+
+The lifecycle states are:
+
+1. Local project files.
+2. Registered Site confirmed by `project_id` and `get_site`.
+3. Saved Sites version confirmed by the hosting workflow.
+4. Published Site confirmed only by a nonempty `get_site.current_live_url` after deployment.
 
 ## Runbooks for common changes
 

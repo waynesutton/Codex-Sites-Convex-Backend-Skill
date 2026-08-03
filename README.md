@@ -46,6 +46,17 @@ flowchart LR
 
 The Convex MCP server helps Codex during development. Visitors use the public Convex React client and generated API types.
 
+## Four Codex Sites states
+
+| State | Required evidence |
+| --- | --- |
+| **Local Sites project** | Editable Sites files exist in the current folder |
+| **Registered Site** | `.openai/hosting.json` contains a valid nonempty `project_id`, and `get_site` confirms the Site in the ChatGPT Sites sidebar |
+| **Saved Sites version** | The current build was uploaded and saved as a version |
+| **Published Site** | The saved version deployed successfully, and `get_site.current_live_url` is nonempty and matches the deployment URL |
+
+These states are not interchangeable. A hosting manifest alone does not prove registration, and registration or a saved version does not create a live `.chatgpt.site` URL.
+
 ## Accounts, access, and ownership
 
 | Context | Account or key | Can power a published Site? |
@@ -101,7 +112,7 @@ Settings can vary by plan, region, workspace policy, and the current Sites beta.
 
 Browser-public variables such as `NEXT_PUBLIC_CONVEX_URL` and `VITE_*` are visible to visitors even if a UI offers a Secret switch. Keep `CONVEX_DEPLOY_KEY` and third-party backend secrets out of browser variables. Convex development and production environments are separate, and Convex functions do not read the frontend's `.env.local`.
 
-`.openai/hosting.json` links the local source to the hosted Sites project. It may contain `project_id` and logical D1/R2 binding names, but never runtime environment values or secrets. Its `project_id` is a Sites identifier, not a Convex project ID.
+`.openai/hosting.json` is the local hosting manifest. Its presence alone does not mean the Site is registered. A valid nonempty `project_id`, confirmed with `get_site`, links the local source to the registered Site. The file may also contain logical D1/R2 binding names, but never runtime environment values or secrets. Its `project_id` is a Sites identifier, not a Convex project ID.
 
 ## Change the connected Convex deployment
 
@@ -220,7 +231,13 @@ power a .chatgpt.site URL.
 $codex-sites-convex Move this validated local app to production and publish it
 with Codex Sites.
 
-First inspect the current Convex configuration without displaying credentials.
+First rerun the local production build. Inspect .openai/hosting.json without
+displaying secrets. If it lacks a valid project_id, create the Site exactly
+once, save its project ID, and call get_site to confirm it appears in the
+ChatGPT Sites sidebar. Explain that this registers the Site but does not save a
+version or publish it.
+
+Next inspect the current Convex configuration without displaying credentials.
 Tell me whether this folder is connected to Convex Cloud. Confirm the Convex
 account, team, project, and exact production deployment with me before making
 production changes.
@@ -240,13 +257,13 @@ Deploy Convex first, capture the exact production convex.cloud URL, and rebuild
 the Codex Site with that URL. Confirm the browser bundle contains no localhost
 URL, development deployment URL, deploy key, or backend secret.
 
-If the folder is not linked to a Codex Sites project, create one once and save
-its project ID. Publish the Site privately unless I approve another audience.
-
-Wait for the Sites deployment to finish. Verify a query, mutation, and realtime
-update through the published Site. Confirm its live URL and access mode, open
-the Site, then give me the exact .chatgpt.site URL and management instructions.
-Do not add product authentication unless I request it.
+Save the production Sites build as a version, then publish it privately unless
+I approve another audience. Wait for the Sites deployment to finish. Require a
+nonempty get_site.current_live_url before calling the Site published. Verify a
+query, mutation, and realtime update through that live Site. Confirm its access
+mode, open the Site, then give me the exact .chatgpt.site URL and management
+instructions. If work stops, report the last completed Sites state and the next
+required action. Do not add product authentication unless I request it.
 ```
 
 Codex will inspect the workspace, preserve existing architecture, check current official Convex components and documentation, implement the smallest complete product, run validation, deploy Convex first, and publish the frontend through Codex Sites.
@@ -261,8 +278,8 @@ The footer follows the Site's resolved theme. It uses the color Convex wordmark 
 
 ## How the workflow works
 
-1. **Inspect** — Classify the workspace as empty, Sites-only, Convex-only, or already combined.
-2. **Prepare Sites** — Keep the existing `.openai/hosting.json`, package manager, and vinext/Vite structure, but defer starting the server.
+1. **Inspect** — Classify the workspace and report local, registered, saved-version, and published states separately.
+2. **Prepare Sites** — Keep the existing `.openai/hosting.json`, package manager, and vinext/Vite structure, but treat the manifest as local metadata until a valid `project_id` is confirmed.
 3. **Provision Convex** — Use accountless `npx convex dev --once` locally or an isolated scoped cloud-agent deployment when required.
 4. **Check capabilities** — Refresh the official component catalog and `llms.txt` before implementation.
 5. **Load component instructions** — Read the complete official component `SKILL.md` when one is selected.
@@ -270,13 +287,18 @@ The footer follows the Site's resolved theme. It uses the color Convex wordmark 
 7. **Prove connectivity** — Test a minimal query, mutation, and realtime update from the published Sites origin.
 8. **Build** — Implement the requested product with generated APIs, real Convex-backed data, and the removable built-with footer.
 9. **Validate** — Run Convex generation, backend checks, frontend build, lint, type checks, and structural verification.
-10. **Publish** — Deploy Convex, rebuild with the production Convex URL, publish the Site, verify its exact URL and access policy, and test it in Chrome.
+10. **Register early** — When publication was requested, create the Site exactly once after the local build passes and confirm it appears in the Sites sidebar before Convex production setup.
+11. **Save and publish** — Deploy Convex, rebuild with the production Convex URL, save a Sites version, deploy it, require `get_site.current_live_url`, and test it in Chrome.
 
-Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
+Lifecycle order: local Sites project → registered Site → Convex production backend → production Convex URL → Sites production build → saved Sites version → Sites deployment → live URL and access verification.
 
 ## Publishing, URLs, and access
 
-After publishing, the skill polls the deployment until success or failure, uses the exact successful deployment URL, and confirms it against `get_site.current_live_url`. For an already-published Site, it reads `project_id` from `.openai/hosting.json` and uses `get_site.current_live_url` as canonical. It never guesses a URL from the slug.
+For publication work, the skill registers the Site once after the local build passes. This makes the Site visible in the ChatGPT Sites sidebar even if Convex production setup pauses later. Registration does not save a Sites version or publish it.
+
+After saving and deploying the production version, the skill polls the deployment until success or failure, retains the exact successful deployment URL, and requires a matching nonempty `get_site.current_live_url` before calling the Site published. For an already-published Site, it reads `project_id` from `.openai/hosting.json` and uses `get_site.current_live_url` as canonical. It never guesses a URL from the slug.
+
+If work stops, the handoff names the last completed state and the next required action. For example: `Last completed state: Registered Site. Next action: connect and authorize the intended Convex production deployment.`
 
 ### Deploy Convex for development
 
@@ -410,7 +432,7 @@ Run component discovery manually:
 ./scripts/preflight.sh /path/to/project
 ```
 
-Reports the available runtime, project type, package manager, Sites marker, Convex backend, generated API, and agent guidance.
+Reports the available runtime, local Sites manifest, local registration metadata, remote checks still required for saved and published states, package manager, Convex backend, generated API, and agent guidance.
 
 ### Component discovery
 
@@ -424,9 +446,12 @@ Refreshes the official Convex catalog and returns relevant backend candidates.
 
 ```bash
 ./scripts/verify-project.sh /path/to/project
+
+# Require Sites registration metadata before publishing
+./scripts/verify-project.sh /path/to/project --publish
 ```
 
-Checks the required Sites and Convex structure, generated API, dependency boundary, and obvious credential risks.
+Checks the required Sites and Convex structure, generated API, dependency boundary, and obvious credential risks. With `--publish`, it also requires a valid nonempty `project_id` in `.openai/hosting.json`.
 
 ### Backend readiness
 
@@ -447,6 +472,8 @@ Confirms `NEXT_PUBLIC_CONVEX_URL` and generated API types exist before the Sites
 | Hydration warning mentions Grammarly-injected attributes | Browser extension modified the DOM | Verify in a clean Chrome profile or with extensions disabled; do not change the app if it disappears |
 | React crashes because the Convex URL is missing | Provider initialization throws during render | Render a helpful configuration state and create the Convex client only after the URL exists |
 | Local backend works but published Site does not | Production bundle used the local or stale Convex URL | Deploy Convex, set the production URL, and run a clean Sites production build before publishing |
+| `.openai/hosting.json` exists but no Site appears in the sidebar | The folder has a local hosting manifest but no confirmed registration | Register the Site once, persist its `project_id`, and confirm it with `get_site` |
+| Deployment succeeded but no live URL is confirmed | The deployment result has not been reconciled with the Site record | Call `get_site`; do not report publication until `current_live_url` is nonempty and matches |
 
 Never accept a fallback port or local-only success as proof that the published integration works. Final QA must confirm production reads, writes, and realtime updates from the published Sites URL.
 

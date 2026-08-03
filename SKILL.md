@@ -37,6 +37,13 @@ If the installed `sites:sites-building`, `sites:sites-hosting`, `convex:convex-e
 
 Run `scripts/preflight.sh` from the target project root. Inspect `AGENTS.md`, `.openai/hosting.json`, `package.json`, the lockfile, `app/`, `convex/`, and `.env.example` when present. Preserve the existing package manager and working structure.
 
+Report these Sites states separately; never use one as proof of another:
+
+1. **Local Sites project:** the editable project files exist in the current folder. A hosting manifest may exist without a registration.
+2. **Registered Site:** `.openai/hosting.json` contains a valid nonempty `project_id`, and `get_site` confirms the Site appears in the ChatGPT Sites sidebar.
+3. **Saved Sites version:** the current build was uploaded and saved as a version. Registration alone does not create or deploy a version.
+4. **Published Site:** a saved version deployed successfully and `get_site.current_live_url` is nonempty. A deployment URL or successful save alone is not sufficient.
+
 For a new Codex user, explain that they paste the `$codex-sites-convex` prompt into a Codex task opened on their app folder. Codex can run the listed commands in its integrated terminal. If the user chooses to run a command manually, tell them to open the integrated terminal in the same project root and show the exact command. Do not assume they know what “project root,” “terminal,” or a command approval means.
 
 Classify `CONVEX_DEPLOYMENT`, the presence and scope of `CONVEX_DEPLOY_KEY`, saved Convex CLI user configuration, and the public Convex URL without printing credentials or configuration contents. No login prompt does not prove accountless mode; saved CLI credentials may already be active.
@@ -44,13 +51,13 @@ Classify `CONVEX_DEPLOYMENT`, the presence and scope of `CONVEX_DEPLOY_KEY`, sav
 Classify the task:
 
 - **Empty/projectless directory:** initialize Codex Sites first, then add Convex to that same project.
-- **Existing Sites project:** preserve its structure and add or extend Convex.
+- **Existing local Sites project:** preserve its structure, report whether it is registered, and add or extend Convex.
 - **Existing Convex project without Sites:** preserve `convex/` and initialize the Sites frontend around it; do not scaffold another product app.
 - **Both already present:** make only the requested product changes.
 
 ### 2. Prepare or preserve the Sites frontend
 
-For a new project, use the installed Sites building workflow to initialize the project files, but do not start or open the Sites server yet. This cross-product ordering overrides the usual Sites-only preview order: provision Convex and pass the backend-readiness gate first. A Sites project is identified by `.openai/hosting.json`; do not replace its vinext/Vite/Cloudflare Worker structure.
+For a new project, use the installed Sites building workflow to initialize the local project files, but do not start or open the Sites server yet. This cross-product ordering overrides the usual Sites-only preview order: provision Convex and pass the backend-readiness gate first. Treat `.openai/hosting.json` as a local hosting manifest, not proof of registration; only a valid nonempty `project_id` identifies a registered Site. Do not replace the project's vinext/Vite/Cloudflare Worker structure.
 
 For an existing project, install dependencies only when absent. Inspect the actual starter before choosing its public environment-variable convention.
 
@@ -162,23 +169,31 @@ npx convex codegen
 npm run build
 ```
 
-Run lint and a separate type check when defined. Use `scripts/verify-project.sh` for structural checks. Review changed Convex functions for validators, authentication, public/internal visibility, indexes, pagination, bounded reads, and mutation conflicts.
+Run lint and a separate type check when defined. Use `scripts/verify-project.sh` for local structural checks, or `scripts/verify-project.sh --publish` when publication was requested. Review changed Convex functions for validators, authentication, public/internal visibility, indexes, pagination, bounded reads, and mutation conflicts.
 
 Fix failures and rerun the failing check. Do not declare completion from a local UI preview alone.
 
+### 10. Register the Site early when publication is requested
+
+After the local production build passes, inspect `.openai/hosting.json`. If publication was requested and no valid `project_id` exists, call `create_site` exactly once through the Sites hosting workflow and persist the returned `project_id`. Call `get_site` to confirm the registration and that the Site appears in the ChatGPT Sites sidebar before starting or resuming Convex production setup.
+
+This checkpoint registers the Site only. Do not claim that a Sites version was saved or that the Site was published. If Convex account, project, environment, or production authorization later pauses the workflow, the registered Site must remain discoverable in the sidebar. Report `Registered Site` as the last completed state and name the next required Convex action.
+
 If a hydration warning mentions attributes injected by Grammarly or another browser extension, verify once in a clean Chrome profile or with extensions disabled. Do not change application code when the warning disappears and the server-rendered markup otherwise matches.
 
-### 10. Publish and hand off
+### 11. Publish and hand off
 
 Read and follow [references/deployment-and-qa.md](references/deployment-and-qa.md) completely.
 
-Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
+Lifecycle order: local Sites project → registered Site → Convex production backend → production Convex URL → Sites production build → saved Sites version → Sites deployment → live URL and access verification.
 
 Before publishing, resolve whether the Site should be public or require sign-in. Default to private when the user has not requested public access. Explain the resolved access mode and obtain explicit authorization before public publishing or any access-list change.
 
 An accountless local backend cannot power a published Site. Before production deployment, confirm the intended Convex team, project, production deployment, and authorized account or production-scoped key. Reject any production bundle containing localhost, `127.0.0.1`, a local URL, or an unintended development deployment.
 
-Poll the Sites deployment to success or failure, use only its exact returned `url`, then call `get_site` to confirm `current_live_url` and access. Open the deployed URL in Codex and make its clickable link the first item in the final answer. For an existing Site, read `project_id` from `.openai/hosting.json`, call `get_site`, and treat `current_live_url` as canonical; never reconstruct a URL from a slug.
+Call `save_site_version` once for the production build, then deploy that saved version. Poll the Sites deployment to success or failure and retain its exact returned `url`, but report the Site as published only after `get_site.current_live_url` is nonempty and matches that URL. Open the confirmed live URL in Codex and make its clickable link the first item in the final answer. For an existing Site, read `project_id` from `.openai/hosting.json`, call `get_site`, and treat `current_live_url` as canonical; never reconstruct a URL from a slug.
+
+If work stops at any point, report the last completed state using the four state names above and the single next required action. Never upgrade the wording from local, registered, or saved to published without a confirmed `get_site.current_live_url`.
 
 Every published handoff must explain how to reopen the Site in ChatGPT Sites and manage it through Settings. Hosted Site management is not available through a standalone Codex CLI or IDE screen.
 
@@ -199,3 +214,4 @@ Finish only when:
 - the published connection was tested when publishing was requested;
 - the handoff states Sites access, visitor sign-in, Convex backend ownership, production deployment type, shared versus per-user data, and future developer requirements without exposing credentials;
 - the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker.
+- every incomplete handoff names the last completed Sites state and the next required action.

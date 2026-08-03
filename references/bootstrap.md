@@ -25,6 +25,8 @@ If Sites was already running when Convex created or changed `.env.local`, stop i
 
 Preserve `.openai/hosting.json`, the package manager, lockfile, Vite/vinext structure, worker entrypoint, and existing scripts. Add only the Convex dependency, `convex/`, generated client types, provider, and requested product code.
 
+Do not treat the manifest alone as a registered Site. A valid nonempty `project_id` means the local folder has registration metadata; confirm that registration with `get_site`. When publication is requested, register the Site exactly once after the local build passes and before Convex production setup can pause the workflow.
+
 ## Existing Convex project
 
 Preserve `convex/`, the deployment configuration, schema, generated types, and auth. Add the Sites frontend in the existing project root only when it does not conflict with the current package structure. If it would overwrite an existing application, stop and explain the collision.

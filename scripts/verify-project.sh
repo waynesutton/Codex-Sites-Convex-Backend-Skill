@@ -1,8 +1,33 @@
 #!/usr/bin/env bash
 set -u
 
-project_dir="${1:-.}"
+project_dir="."
+publishing_requested=0
 failures=0
+
+for argument in "$@"; do
+  case "$argument" in
+    --publish)
+      publishing_requested=1
+      ;;
+    -h|--help)
+      echo "Usage: $0 [project-directory] [--publish]"
+      echo "Use --publish to require a registered Sites project_id."
+      exit 0
+      ;;
+    --*)
+      echo "ERROR: unknown option: $argument"
+      exit 2
+      ;;
+    *)
+      if [[ "$project_dir" != "." ]]; then
+        echo "ERROR: provide only one project directory"
+        exit 2
+      fi
+      project_dir="$argument"
+      ;;
+  esac
+done
 
 check_file() {
   if [[ -e "$1" ]]; then
@@ -21,6 +46,40 @@ cd "$project_dir" 2>/dev/null || {
 check_file package.json
 check_file .openai/hosting.json
 check_file convex
+
+if [[ -f .openai/hosting.json ]]; then
+  if ! command -v node >/dev/null 2>&1; then
+    echo "MISSING: node is required to validate .openai/hosting.json"
+    failures=$((failures + 1))
+  else
+    project_id="$(node -e '
+      const fs = require("node:fs");
+      try {
+        const hosting = JSON.parse(fs.readFileSync(".openai/hosting.json", "utf8"));
+        if (typeof hosting.project_id === "string" && hosting.project_id.trim() !== "") {
+          console.log(hosting.project_id.trim());
+          process.exit(0);
+        }
+        process.exit(1);
+      } catch {
+        process.exit(2);
+      }
+    ')"
+    project_id_status=$?
+
+    if [[ "$project_id_status" -eq 0 ]]; then
+      echo "OK: Sites registration metadata project_id=$project_id; confirm remotely with get_site"
+    elif [[ "$project_id_status" -eq 2 ]]; then
+      echo "INVALID: .openai/hosting.json is not valid JSON"
+      failures=$((failures + 1))
+    elif [[ "$publishing_requested" -eq 1 ]]; then
+      echo "MISSING: valid project_id in .openai/hosting.json; register the Site before publishing"
+      failures=$((failures + 1))
+    else
+      echo "INFO: local Sites project is not registered; project_id is required only for publishing"
+    fi
+  fi
+fi
 
 if [[ -f .env.local ]] && rg -q '^NEXT_PUBLIC_CONVEX_URL=.+$' .env.local; then
   echo "OK: NEXT_PUBLIC_CONVEX_URL"
@@ -61,4 +120,8 @@ if (( failures > 0 )); then
   exit 1
 fi
 
-echo "PASSED: structural checks"
+if [[ "$publishing_requested" -eq 1 ]]; then
+  echo "PASSED: structural and publishing-registration checks"
+else
+  echo "PASSED: structural checks"
+fi

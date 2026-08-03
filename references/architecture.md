@@ -24,6 +24,17 @@ Visitor browser
 
 See [sites-settings-and-environment.md](sites-settings-and-environment.md) for Sites management, environment layers, hosting metadata, and update runbooks.
 
+## Sites lifecycle states
+
+| State | Required evidence |
+| --- | --- |
+| Local Sites project | Editable Sites project files exist in the current folder |
+| Registered Site | A valid nonempty `project_id` exists and `get_site` confirms the hosted Site record |
+| Saved Sites version | The current build was uploaded and saved as a Sites version |
+| Published Site | A saved version deployed successfully and `get_site.current_live_url` is nonempty |
+
+These states are cumulative but not interchangeable. `.openai/hosting.json` without a valid `project_id` is only a local manifest. A returned deployment URL is provisional until `get_site.current_live_url` confirms the live Site.
+
 ## Account boundaries
 
 See [accounts-access-and-ownership.md](accounts-access-and-ownership.md) for the account matrix, safe credential detection, ownership rules, Sites access, and application authentication. The essential boundary is: Sites controls who can open the frontend; Convex application authorization controls which data an app user can read or change.
