@@ -46,6 +46,19 @@ flowchart LR
 
 The Convex MCP server helps Codex during development. Visitors use the public Convex React client and generated API types.
 
+The publishing lifecycle is separate from the runtime data flow:
+
+```mermaid
+flowchart LR
+    L["Local Sites project"] --> R["Registered Site"]
+    R --> C["Convex production backend"]
+    C --> U["Production Convex URL"]
+    U --> B["Sites production build"]
+    B --> V["Saved Sites version"]
+    V --> D["Sites deployment"]
+    D --> P["Published Site<br/>confirmed by get_site.current_live_url"]
+```
+
 ## Four Codex Sites states
 
 | State | Required evidence |
