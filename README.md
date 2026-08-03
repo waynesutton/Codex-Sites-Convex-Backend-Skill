@@ -51,7 +51,7 @@ The Convex MCP server helps Codex during development. Visitors use the public Co
 | State | Required evidence |
 | --- | --- |
 | **Local Sites project** | Editable Sites files exist in the current folder |
-| **Registered Site** | `.openai/hosting.json` contains a valid nonempty `project_id`, and `get_site` confirms the Site in the ChatGPT Sites sidebar |
+| **Registered Site** | `.openai/hosting.json` contains a valid nonempty `project_id`, and `get_site` confirms the hosted record; sidebar visibility is checked separately |
 | **Saved Sites version** | The current build was uploaded and saved as a version |
 | **Published Site** | The saved version deployed successfully, and `get_site.current_live_url` is nonempty and matches the deployment URL |
 
@@ -233,9 +233,10 @@ with Codex Sites.
 
 First rerun the local production build. Inspect .openai/hosting.json without
 displaying secrets. If it lacks a valid project_id, create the Site exactly
-once, save its project ID, and call get_site to confirm it appears in the
-ChatGPT Sites sidebar. Explain that this registers the Site but does not save a
-version or publish it.
+once, save its project ID, and call get_site to confirm the hosted record.
+Check list_sites or the Sites UI separately for sidebar visibility. If indexing
+is delayed, keep the existing project ID and do not create a duplicate. Explain
+that this registers the Site but does not save a version or publish it.
 
 Next inspect the current Convex configuration without displaying credentials.
 Tell me whether this folder is connected to Convex Cloud. Confirm the Convex
@@ -287,14 +288,14 @@ The footer follows the Site's resolved theme. It uses the color Convex wordmark 
 7. **Prove connectivity** — Test a minimal query, mutation, and realtime update from the published Sites origin.
 8. **Build** — Implement the requested product with generated APIs, real Convex-backed data, and the removable built-with footer.
 9. **Validate** — Run Convex generation, backend checks, frontend build, lint, type checks, and structural verification.
-10. **Register early** — When publication was requested, create the Site exactly once after the local build passes and confirm it appears in the Sites sidebar before Convex production setup.
+10. **Register early** — When publication was requested, create the Site exactly once after the local build passes, confirm the hosted record, and check sidebar visibility separately before Convex production setup.
 11. **Save and publish** — Deploy Convex, rebuild with the production Convex URL, save a Sites version, deploy it, require `get_site.current_live_url`, and test it in Chrome.
 
 Lifecycle order: local Sites project → registered Site → Convex production backend → production Convex URL → Sites production build → saved Sites version → Sites deployment → live URL and access verification.
 
 ## Publishing, URLs, and access
 
-For publication work, the skill registers the Site once after the local build passes. This makes the Site visible in the ChatGPT Sites sidebar even if Convex production setup pauses later. Registration does not save a Sites version or publish it.
+For publication work, the skill registers the Site once after the local build passes. Registration does not save a Sites version or publish it. Sidebar indexing may lag behind successful registration, so check `list_sites` or the Sites UI separately and never create a duplicate after `get_site` succeeds.
 
 After saving and deploying the production version, the skill polls the deployment until success or failure, retains the exact successful deployment URL, and requires a matching nonempty `get_site.current_live_url` before calling the Site published. For an already-published Site, it reads `project_id` from `.openai/hosting.json` and uses `get_site.current_live_url` as canonical. It never guesses a URL from the slug.
 
@@ -472,7 +473,7 @@ Confirms `NEXT_PUBLIC_CONVEX_URL` and generated API types exist before the Sites
 | Hydration warning mentions Grammarly-injected attributes | Browser extension modified the DOM | Verify in a clean Chrome profile or with extensions disabled; do not change the app if it disappears |
 | React crashes because the Convex URL is missing | Provider initialization throws during render | Render a helpful configuration state and create the Convex client only after the URL exists |
 | Local backend works but published Site does not | Production bundle used the local or stale Convex URL | Deploy Convex, set the production URL, and run a clean Sites production build before publishing |
-| `.openai/hosting.json` exists but no Site appears in the sidebar | The folder has a local hosting manifest but no confirmed registration | Register the Site once, persist its `project_id`, and confirm it with `get_site` |
+| `.openai/hosting.json` exists but no Site appears in the sidebar | The folder may be unregistered, or sidebar indexing may lag behind a valid hosted record | If no `project_id` exists, register once and persist it. If `get_site` succeeds, do not create a duplicate; refresh or reopen Sites and recheck `list_sites` or the UI |
 | Deployment succeeded but no live URL is confirmed | The deployment result has not been reconciled with the Site record | Call `get_site`; do not report publication until `current_live_url` is nonempty and matches |
 
 Never accept a fallback port or local-only success as proof that the published integration works. Final QA must confirm production reads, writes, and realtime updates from the published Sites URL.

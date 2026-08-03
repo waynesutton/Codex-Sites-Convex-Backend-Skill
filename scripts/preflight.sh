@@ -44,7 +44,8 @@ else
 
   if [[ "$registration_status" -eq 0 ]]; then
     echo "LOCAL SITES PROJECT: FOUND: .openai/hosting.json"
-    echo "SITES REGISTRATION: LINKED LOCALLY: project_id=$registration_output; call get_site to confirm sidebar registration"
+    echo "SITES REGISTRATION: LINKED LOCALLY: call get_site to confirm the hosted record"
+    echo "SIDEBAR VISIBILITY: REMOTE UI CHECK REQUIRED: get_site does not prove list indexing"
   elif [[ "$registration_status" -eq 1 ]]; then
     echo "LOCAL SITES PROJECT: FOUND: .openai/hosting.json"
     echo "SITES REGISTRATION: NOT REGISTERED: valid project_id is missing"

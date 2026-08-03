@@ -40,7 +40,7 @@ Run `scripts/preflight.sh` from the target project root. Inspect `AGENTS.md`, `.
 Report these Sites states separately; never use one as proof of another:
 
 1. **Local Sites project:** the editable project files exist in the current folder. A hosting manifest may exist without a registration.
-2. **Registered Site:** `.openai/hosting.json` contains a valid nonempty `project_id`, and `get_site` confirms the Site appears in the ChatGPT Sites sidebar.
+2. **Registered Site:** `.openai/hosting.json` contains a valid nonempty `project_id`, and `get_site` confirms the hosted record. Sidebar visibility is checked separately and may lag.
 3. **Saved Sites version:** the current build was uploaded and saved as a version. Registration alone does not create or deploy a version.
 4. **Published Site:** a saved version deployed successfully and `get_site.current_live_url` is nonempty. A deployment URL or successful save alone is not sufficient.
 
@@ -175,9 +175,9 @@ Fix failures and rerun the failing check. Do not declare completion from a local
 
 ### 10. Register the Site early when publication is requested
 
-After the local production build passes, inspect `.openai/hosting.json`. If publication was requested and no valid `project_id` exists, call `create_site` exactly once through the Sites hosting workflow and persist the returned `project_id`. Call `get_site` to confirm the registration and that the Site appears in the ChatGPT Sites sidebar before starting or resuming Convex production setup.
+After the local production build passes, inspect `.openai/hosting.json`. If publication was requested and no valid `project_id` exists, call `create_site` exactly once through the Sites hosting workflow and persist the returned `project_id`. Call `get_site` to confirm the registration before starting or resuming Convex production setup. Check `list_sites` or the Sites UI separately for sidebar visibility.
 
-This checkpoint registers the Site only. Do not claim that a Sites version was saved or that the Site was published. If Convex account, project, environment, or production authorization later pauses the workflow, the registered Site must remain discoverable in the sidebar. Report `Registered Site` as the last completed state and name the next required Convex action.
+This checkpoint registers the Site only. Do not claim that a Sites version was saved or that the Site was published. If `get_site` succeeds but the Site is not listed yet, preserve the existing `project_id`, do not call `create_site` again, report `Registered Site; sidebar indexing pending`, and ask the user to refresh or reopen Sites. Report `Registered Site` as the last completed lifecycle state and name the next required Convex action.
 
 If a hydration warning mentions attributes injected by Grammarly or another browser extension, verify once in a clean Chrome profile or with extensions disabled. Do not change application code when the warning disappears and the server-rendered markup otherwise matches.
 

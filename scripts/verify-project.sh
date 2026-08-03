@@ -68,7 +68,8 @@ if [[ -f .openai/hosting.json ]]; then
     project_id_status=$?
 
     if [[ "$project_id_status" -eq 0 ]]; then
-      echo "OK: Sites registration metadata project_id=$project_id; confirm remotely with get_site"
+      echo "OK: Sites registration metadata has a nonempty project_id; confirm the hosted record with get_site"
+      echo "INFO: Sidebar visibility requires list_sites or the Sites UI; never create a duplicate after get_site succeeds"
     elif [[ "$project_id_status" -eq 2 ]]; then
       echo "INVALID: .openai/hosting.json is not valid JSON"
       failures=$((failures + 1))

@@ -54,9 +54,10 @@ with Codex Sites.
 
 First rerun the local production build. Inspect .openai/hosting.json without
 displaying secrets. If it lacks a valid project_id, create the Site exactly
-once, save its project ID, and call get_site to confirm it appears in the
-ChatGPT Sites sidebar. Explain that this registers the Site but does not save a
-version or publish it.
+once, save its project ID, and call get_site to confirm the hosted record.
+Check list_sites or the Sites UI separately for sidebar visibility. If indexing
+is delayed, keep the existing project ID and do not create a duplicate. Explain
+that this registers the Site but does not save a version or publish it.
 
 Next inspect the current Convex configuration without displaying credentials.
 Tell me whether this folder is connected to Convex Cloud. Confirm the Convex
@@ -105,10 +106,12 @@ When the user requests publication:
 1. Complete the local build and local validation first.
 2. Run `scripts/verify-project.sh --publish`. If it reports a missing `project_id`, call `create_site` exactly once with the Sites hosting workflow.
 3. Persist the returned `project_id` in `.openai/hosting.json`.
-4. Call `get_site` and confirm the Site record appears in the ChatGPT Sites sidebar.
-5. Report `Registered Site` as the current state, then continue with Convex production setup.
+4. Call `get_site` and confirm the hosted record.
+5. Check `list_sites` or the Sites UI separately for sidebar visibility.
+6. If the record exists but is not listed yet, preserve the `project_id`, do not call `create_site` again, report `Registered Site; sidebar indexing pending`, and ask the user to refresh or reopen Sites.
+7. Report `Registered Site` as the current lifecycle state, then continue with Convex production setup.
 
-Registration is intentionally early so the user can find the Site even if Convex production setup later pauses for account, team, project, environment, or authorization input. Do not save a placeholder version or claim a publication at this checkpoint.
+Registration is intentionally early so the Site has a stable hosted identity even if Convex production setup later pauses for account, team, project, environment, or authorization input. Do not save a placeholder version or claim a publication at this checkpoint.
 
 ## Convex development and production
 

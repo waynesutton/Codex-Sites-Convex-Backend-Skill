@@ -129,6 +129,8 @@ The lifecycle states are:
 3. Saved Sites version confirmed by the hosting workflow.
 4. Published Site confirmed only by a nonempty `get_site.current_live_url` after deployment.
 
+Sidebar appearance is not a lifecycle state. `get_site` confirms that registration succeeded; `list_sites` or the Sites UI confirms discoverability. If the hosted record exists but the sidebar has not indexed it yet, keep the existing `project_id`, do not create a duplicate, and refresh or reopen Sites before checking again.
+
 ## Runbooks for common changes
 
 ### Change frontend code
