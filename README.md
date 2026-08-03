@@ -27,7 +27,7 @@ Without a dedicated workflow, an agent can scaffold a second frontend, introduce
 - Accountless local Agent Mode and isolated cloud-agent guidance
 - A backend-readiness gate before Sites or the browser starts
 - Production deployment ordering and Chrome QA
-- A removable “Built with Codex Sites + Convex” footer using the bundled official artwork
+- A removable, light/dark-aware “Built with Codex Sites + Convex” footer using bundled artwork and a Phosphor GitHub icon
 - Deterministic preflight and project verification scripts
 
 ## Architecture
@@ -120,6 +120,14 @@ Before making an app public, verify product authentication and per-user Convex a
 
 ## Installation
 
+### Where to paste prompts and commands
+
+- Paste blocks labeled `text` into a Codex task.
+- Run blocks labeled `bash` in Codex's integrated terminal at the project root, the folder containing `package.json`.
+- Add blocks labeled `toml` to the named configuration file; do not run them as commands.
+
+Codex can run the terminal commands for you. New users can ask: `Run these commands for me one at a time and explain any approval request before continuing.` See the [integrated terminal guide](https://learn.chatgpt.com/docs/integrated-terminal) and [ChatGPT/Codex docs](https://learn.chatgpt.com/docs).
+
 ### Option 1: Install for your Codex user
 
 ```bash
@@ -176,13 +184,78 @@ $codex-sites-convex Add realtime comments, presence, and notifications to this p
 $codex-sites-convex Review this Codex Sites + Convex app, fix backend issues, and publish it.
 ```
 
+## Two prompts for local and production deployment
+
+Use the local prompt while building. It creates a localhost preview with an accountless Convex backend. An anonymous local backend cannot power a published `.chatgpt.site` URL, so use the production prompt when you are ready for a hosted URL.
+
+### New to Codex? Start here
+
+1. Open your app folder in Codex. This is the folder that contains `package.json`.
+2. Start a new task for that folder.
+3. Paste one complete prompt below into the task and send it.
+4. Let Codex run the commands in its integrated terminal. Review any approval request before accepting it.
+
+You do not need to open a separate Terminal app or type every command yourself. If you prefer to run commands manually, open Codex's integrated terminal in the same project folder and run each command exactly as shown. Read the [Codex integrated terminal guide](https://learn.chatgpt.com/docs/integrated-terminal) or browse the [ChatGPT and Codex documentation](https://learn.chatgpt.com/docs).
+
+### Prompt 1: run locally without a Convex account
+
+```text
+$codex-sites-convex Set up this app for accountless local development with
+Codex Sites and Convex. If this folder is not already a Codex Sites project,
+initialize Sites in this same folder and preserve its normal project structure.
+Run npm install and npx convex dev --once to provision an anonymous local
+backend. Confirm .env.local has NEXT_PUBLIC_CONVEX_URL and that the generated
+Convex API exists before starting the frontend. Keep one Convex watcher and one
+Sites development server running, then verify a query, mutation, and realtime
+update locally. Give me the localhost URL. Do not require a Convex login, create
+a second frontend or database, publish the Site, or claim the local backend can
+power a .chatgpt.site URL.
+```
+
+### Prompt 2: deploy Convex production and create the Sites URL
+
+```text
+$codex-sites-convex Move this validated local app to production and publish it
+with Codex Sites.
+
+First inspect the current Convex configuration without displaying credentials.
+Tell me whether this folder is connected to Convex Cloud. Confirm the Convex
+account, team, project, and exact production deployment with me before making
+production changes.
+
+If Convex Cloud is not configured, walk me through signing in, choosing or
+creating the correct project, and linking this folder. Do not select an
+unrelated project or create a project without telling me.
+
+List the production environment variable names the app requires. Show me how
+to enter secret values securely through the Convex dashboard or CLI. Never ask
+me to paste secret values into chat.
+
+Announce the exact production target and explain what the deployment will
+change. Get my fresh confirmation before deploying.
+
+Deploy Convex first, capture the exact production convex.cloud URL, and rebuild
+the Codex Site with that URL. Confirm the browser bundle contains no localhost
+URL, development deployment URL, deploy key, or backend secret.
+
+If the folder is not linked to a Codex Sites project, create one once and save
+its project ID. Publish the Site privately unless I approve another audience.
+
+Wait for the Sites deployment to finish. Verify a query, mutation, and realtime
+update through the published Site. Confirm its live URL and access mode, open
+the Site, then give me the exact .chatgpt.site URL and management instructions.
+Do not add product authentication unless I request it.
+```
+
 Codex will inspect the workspace, preserve existing architecture, check current official Convex components and documentation, implement the smallest complete product, run validation, deploy Convex first, and publish the frontend through Codex Sites.
 
 Remove the optional footer at any time with this one-line prompt:
 
 ```text
-$codex-sites-convex Remove the “Built with Codex Sites + Convex” footer and its unused logo assets, then run the frontend build.
+$codex-sites-convex Remove the entire “Built with Codex Sites + Convex” footer, its GitHub repository link, Phosphor GitHub icon import, and all unused public/built-with logo assets. Uninstall @phosphor-icons/react only if nothing else uses it, then run the frontend build.
 ```
+
+The footer follows the Site's resolved theme. It uses the color Convex wordmark in light mode, the white wordmark in dark mode, and a Phosphor GitHub icon that inherits the current text color. A manual Site theme takes priority over the operating-system preference.
 
 ## How the workflow works
 
@@ -384,7 +457,8 @@ codex-sites-convex/
 │   └── openai.yaml
 ├── assets/
 │   ├── codex-color.svg
-│   └── convex-color.svg
+│   ├── convex-color.svg
+│   └── convex-white.svg
 ├── references/
 │   ├── accounts-access-and-ownership.md
 │   ├── architecture.md

@@ -37,6 +37,8 @@ If the installed `sites:sites-building`, `sites:sites-hosting`, `convex:convex-e
 
 Run `scripts/preflight.sh` from the target project root. Inspect `AGENTS.md`, `.openai/hosting.json`, `package.json`, the lockfile, `app/`, `convex/`, and `.env.example` when present. Preserve the existing package manager and working structure.
 
+For a new Codex user, explain that they paste the `$codex-sites-convex` prompt into a Codex task opened on their app folder. Codex can run the listed commands in its integrated terminal. If the user chooses to run a command manually, tell them to open the integrated terminal in the same project root and show the exact command. Do not assume they know what “project root,” “terminal,” or a command approval means.
+
 Classify `CONVEX_DEPLOYMENT`, the presence and scope of `CONVEX_DEPLOY_KEY`, saved Convex CLI user configuration, and the public Convex URL without printing credentials or configuration contents. No login prompt does not prove accountless mode; saved CLI credentials may already be active.
 
 Classify the task:
@@ -148,7 +150,7 @@ Propose schema changes before implementing them. Then build the smallest coheren
 - Never throw during React render when `NEXT_PUBLIC_CONVEX_URL` is missing. Render a clear configuration/setup state and construct `ConvexReactClient` only after a valid URL exists.
 - Keep developer account and deployment setup out of normal visitor UI. If a public Site lacks product authentication and per-user authorization, warn that visitors share Convex data before requesting authorization to publish publicly.
 
-Add the removable “Built with Codex Sites + Convex” footer from [references/built-with-footer.md](references/built-with-footer.md) unless the user explicitly asks to omit or remove it. Use the bundled logo assets, link each brand to its official site, and preserve the removal comment in source code.
+Add the removable “Built with Codex Sites + Convex” footer from [references/built-with-footer.md](references/built-with-footer.md) unless the user explicitly asks to omit or remove it. Use the bundled light/dark logo assets, follow the Site's resolved theme, use the Phosphor GitHub logo for the repository link, link each brand to its official site, and preserve the removal comment in source code.
 
 ### 9. Validate in proportion to risk
 
@@ -193,6 +195,7 @@ Finish only when:
 - backend generation/checks and the frontend build pass;
 - no browser bundle contains a secret;
 - the removable built-with footer is present unless the user explicitly opted out;
+- the footer remains legible in the Site's explicit light and dark modes;
 - the published connection was tested when publishing was requested;
 - the handoff states Sites access, visitor sign-in, Convex backend ownership, production deployment type, shared versus per-user data, and future developer requirements without exposing credentials;
 - the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker.

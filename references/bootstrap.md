@@ -1,11 +1,17 @@
 # Bootstrap paths
 
+## Where commands run
+
+Open the app folder in Codex and start a task there. Paste the skill prompt into the task; Codex can run the setup commands in its integrated terminal. A user does not need to copy each command manually. If manual execution is requested, open the integrated terminal at the project root, the folder containing `package.json`, and run one command at a time. Explain approval requests before asking a new user to accept them.
+
+Codex guide: https://learn.chatgpt.com/docs/integrated-terminal
+
 ## New empty workspace
 
 1. Initialize the Sites starter with the installed Sites workflow.
 2. Do not start the Sites server yet.
 3. Install `convex` in the same package.
-4. Run `npx convex dev --once` in the non-interactive agent shell to provision an accountless local backend.
+4. Have Codex run `npx convex dev --once` in its terminal to provision an accountless local backend.
 5. Run `npx convex ai-files install`.
 6. Verify `.env.local` contains a nonempty `NEXT_PUBLIC_CONVEX_URL` and generated API types exist.
 7. Add a guarded `ConvexProvider` that renders a helpful setup state instead of throwing when the URL is absent.

@@ -8,6 +8,7 @@ Apply the hosted management, environment-layer, and update rules in [sites-setti
 
 ## Contents
 
+- Copy-paste local and production prompts
 - Convex development and production
 - Sites publishing and access choice
 - New and existing Site deployment
@@ -22,6 +23,62 @@ Apply the hosted management, environment-layer, and update rules in [sites-setti
 - Confirm the browser uses only a public Convex deployment URL.
 - Confirm `.env.local` contains a nonempty `NEXT_PUBLIC_CONVEX_URL` before starting Sites.
 - Confirm third-party secrets exist only in Convex environment variables.
+
+## Copy-paste prompts
+
+Use the first prompt for a local preview. An anonymous local deployment cannot power a published `.chatgpt.site` URL. Use the second prompt to move the app to Convex Cloud production and publish the Site.
+
+Open the app folder in Codex, start a task, and paste one complete prompt into the task. Codex runs the commands in its integrated terminal. Users who want to run commands themselves should open the terminal at the project root, the folder containing `package.json`. See https://learn.chatgpt.com/docs/integrated-terminal.
+
+### Accountless local development
+
+```text
+$codex-sites-convex Set up this app for accountless local development with
+Codex Sites and Convex. If this folder is not already a Codex Sites project,
+initialize Sites in this same folder and preserve its normal project structure.
+Run npm install and npx convex dev --once to provision an anonymous local
+backend. Confirm .env.local has NEXT_PUBLIC_CONVEX_URL and that the generated
+Convex API exists before starting the frontend. Keep one Convex watcher and one
+Sites development server running, then verify a query, mutation, and realtime
+update locally. Give me the localhost URL. Do not require a Convex login, create
+a second frontend or database, publish the Site, or claim the local backend can
+power a .chatgpt.site URL.
+```
+
+### Production backend and Sites URL
+
+```text
+$codex-sites-convex Move this validated local app to production and publish it
+with Codex Sites.
+
+First inspect the current Convex configuration without displaying credentials.
+Tell me whether this folder is connected to Convex Cloud. Confirm the Convex
+account, team, project, and exact production deployment with me before making
+production changes.
+
+If Convex Cloud is not configured, walk me through signing in, choosing or
+creating the correct project, and linking this folder. Do not select an
+unrelated project or create a project without telling me.
+
+List the production environment variable names the app requires. Show me how
+to enter secret values securely through the Convex dashboard or CLI. Never ask
+me to paste secret values into chat.
+
+Announce the exact production target and explain what the deployment will
+change. Get my fresh confirmation before deploying.
+
+Deploy Convex first, capture the exact production convex.cloud URL, and rebuild
+the Codex Site with that URL. Confirm the browser bundle contains no localhost
+URL, development deployment URL, deploy key, or backend secret.
+
+If the folder is not linked to a Codex Sites project, create one once and save
+its project ID. Publish the Site privately unless I approve another audience.
+
+Wait for the Sites deployment to finish. Verify a query, mutation, and realtime
+update through the published Site. Confirm its live URL and access mode, open
+the Site, then give me the exact .chatgpt.site URL and management instructions.
+Do not add product authentication unless I request it.
+```
 
 ## Convex development and production
 
