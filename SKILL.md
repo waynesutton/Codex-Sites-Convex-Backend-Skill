@@ -87,6 +87,7 @@ For an interactive preview, keep `npx convex dev` running alongside Sites after 
 Treat Convex development and production as separate targets:
 
 - **Development:** use `npx convex dev --once` to provision/push once, then keep `npx convex dev` running for an interactive preview. The frontend uses the development URL written to `.env.local`.
+- **Temporary shared preview:** only when explicitly requested, select or create an isolated, expiring Convex Cloud dev deployment with a deployment-scoped key, push with `npx convex dev --once`, and publish Sites against its public URL. Label it non-production and report its expiration.
 - **Production:** after development validation, use `npx convex deploy`. Capture the production deployment URL and rebuild Sites with that URL; never publish a bundle connected to the development deployment.
 
 ### 4. Complete the official capability check
@@ -191,11 +192,15 @@ Before publishing, resolve whether the Site should be public or require sign-in.
 
 An accountless local backend cannot power a published Site. Before production deployment, confirm the intended Convex team, project, production deployment, and authorized account or production-scoped key. Reject any production bundle containing localhost, `127.0.0.1`, a local URL, or an unintended development deployment.
 
+For an explicitly requested temporary shared preview, follow the Cloud Agent Mode path in [references/agent-mode.md](references/agent-mode.md) and [references/deployment-and-qa.md](references/deployment-and-qa.md). Confirm the team and project; reuse only a suitable isolated cloud dev deployment or create one with an explicit expiration; use only deployment-scoped access; configure its environment; push with `npx convex dev --once`; and build Sites with its public `convex.cloud` URL. Confirm Sites access before publishing. Never expose the deploy key, call the backend production, or imply that preview data automatically transfers to production.
+
 Call `save_site_version` once for the production build, then deploy that saved version. Poll the Sites deployment to success or failure and retain its exact returned `url`, but report the Site as published only after `get_site.current_live_url` is nonempty and matches that URL. Open the confirmed live URL in Codex and make its clickable link the first item in the final answer. For an existing Site, read `project_id` from `.openai/hosting.json`, call `get_site`, and treat `current_live_url` as canonical; never reconstruct a URL from a slug.
 
 If work stops at any point, report the last completed state using the four state names above and the single next required action. Never upgrade the wording from local, registered, or saved to published without a confirmed `get_site.current_live_url`.
 
 Every published handoff must explain how to reopen the Site in ChatGPT Sites and manage it through Settings. Hosted Site management is not available through a standalone Codex CLI or IDE screen.
+
+Every temporary-preview handoff must begin with the live Sites URL and label `Temporary shared preview`. Report the exact Convex deployment expiration, Sites access mode, visitor sign-in requirements, whether data is shared or isolated, what fails after expiration, and the steps required to promote to production.
 
 Do not enable production MCP writes, generate a sign-in bypass token, make a Site public, or add users or groups unless the user explicitly authorizes that action.
 
@@ -212,6 +217,7 @@ Finish only when:
 - the removable built-with footer is present unless the user explicitly opted out;
 - the footer remains legible in the Site's explicit light and dark modes;
 - the published connection was tested when publishing was requested;
-- the handoff states Sites access, visitor sign-in, Convex backend ownership, production deployment type, shared versus per-user data, and future developer requirements without exposing credentials;
+- the handoff states Sites access, visitor sign-in, Convex backend ownership, Convex deployment type, shared versus per-user data, and future developer requirements without exposing credentials;
+- a temporary shared preview is labeled non-production and reports its exact backend expiration, failure behavior, data-sharing model, and production-promotion steps;
 - the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker.
 - every incomplete handoff names the last completed Sites state and the next required action.

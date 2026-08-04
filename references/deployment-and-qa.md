@@ -8,8 +8,8 @@ Apply the hosted management, environment-layer, and update rules in [sites-setti
 
 ## Contents
 
-- Copy-paste local and production prompts
-- Convex development and production
+- Copy-paste local, temporary-preview, and production prompts
+- Convex local, cloud preview, and production deployments
 - Sites lifecycle and early registration
 - Sites publishing and access choice
 - New and existing Site deployment
@@ -27,7 +27,7 @@ Apply the hosted management, environment-layer, and update rules in [sites-setti
 
 ## Copy-paste prompts
 
-Use the first prompt for a local preview. An anonymous local deployment cannot power a published `.chatgpt.site` URL. Use the second prompt to move the app to Convex Cloud production and publish the Site.
+Use the first prompt for a local preview. An anonymous local deployment cannot power a published `.chatgpt.site` URL. Use the second prompt for a temporary shared preview backed by an expiring Convex Cloud dev deployment. Use the third prompt to move the app to Convex Cloud production.
 
 Open the app folder in Codex, start a task, and paste one complete prompt into the task. Codex runs the commands in its integrated terminal. Users who want to run commands themselves should open the terminal at the project root, the folder containing `package.json`. See https://learn.chatgpt.com/docs/integrated-terminal.
 
@@ -44,6 +44,34 @@ Sites development server running, then verify a query, mutation, and realtime
 update locally. Give me the localhost URL. Do not require a Convex login, create
 a second frontend or database, publish the Site, or claim the local backend can
 power a .chatgpt.site URL.
+```
+
+### Temporary shared preview with Cloud Agent Mode
+
+```text
+$codex-sites-convex Publish this app as a temporary shared preview using Convex
+Cloud Agent Mode and Codex Sites.
+
+Confirm the intended Convex team and project. Reuse an existing isolated cloud
+development deployment only after verifying its scope and expiration, or create
+an expiring dev deployment for this app. Use only deployment-scoped access and
+never expose its deploy key in browser code.
+
+Configure the cloud dev deployment's required environment variables without
+printing secret values, then push the Convex functions with npx convex dev
+--once. Rebuild Codex Sites with that deployment's public convex.cloud URL and
+confirm the bundle contains no deploy key, backend secret, localhost URL, or
+unintended deployment URL.
+
+Confirm the exact Sites access mode and get my authorization before making it
+public or expanding access. Save and deploy the Sites version, require a
+matching nonempty get_site.current_live_url, then verify reads, writes, and
+realtime updates through the live Sites URL.
+
+Label the result as a temporary shared preview, not production. Report the
+Convex deployment expiration, Sites access mode, visitor sign-in requirements,
+whether visitors share data, what stops working after expiration, and the exact
+steps required to promote the app to production.
 ```
 
 ### Production backend and Sites URL
@@ -127,6 +155,21 @@ Use this while building and testing. It is not the backend for the published Sit
 
 Accountless agent development may use a local backend without a Convex account. A cloud development deployment requires a Convex project and suitably scoped credentials.
 
+### Temporary cloud preview backend
+
+Use this only for an explicitly requested temporary shared preview:
+
+1. Confirm the intended Convex team and project before selecting or creating a deployment.
+2. Inspect an existing isolated cloud dev deployment's owner, reference, key scope, and expiration without displaying credentials. Reuse it only when all four match the preview.
+3. Otherwise create a named dev deployment with `npx convex deployment create --type dev --select <team>:<project>:<dev-reference> --expiration <value>`.
+4. Create or reuse a deploy key scoped only to that dev deployment. Save it to an ignored environment file; never print it or expose it through a browser-public prefix.
+5. Set required cloud dev environment variables after deployment selection and before pushing functions. Use project defaults only when they should apply to every new cloud deployment.
+6. Run `npx convex dev --once`, capture the public `convex.cloud` URL, and build Sites with that URL.
+7. Scan the production Sites bundle for deploy keys, backend secrets, localhost references, and unintended deployment URLs.
+8. Confirm Sites access, save and deploy the version, require `get_site.current_live_url`, and complete live read/write/realtime QA.
+
+Report the exact expiration returned by Convex or confirmed in deployment settings; never estimate it. The Site may remain reachable after the dev deployment expires, but backend reads, writes, scheduled functions, and realtime updates will stop. Do not call the preview production.
+
 ### Production backend
 
 Use this only after development checks pass:
@@ -139,6 +182,8 @@ Use this only after development checks pass:
 6. Run a clean frontend production build. Inspect the built configuration and ensure it does not reference a local or development Convex URL.
 
 Never use `npx convex dev` as the production deployment step, and never publish a Sites bundle connected to a development backend.
+
+The only exception to the development-backend publishing rule is an explicitly requested, expiring temporary shared preview that follows the safeguards above and is labeled as non-production in every handoff.
 
 ## Choose who can open the Codex Site
 
@@ -250,19 +295,51 @@ Sharing or widening access is an external side effect. Ask before changing the a
 - [ ] The current access mode is reported accurately.
 - [ ] Private login requirements are explained when applicable.
 - [ ] The user is told that visitors do not need Convex accounts.
-- [ ] The handoff names the production deployment type and who can manage it without exposing credentials.
+- [ ] The handoff names the selected Convex deployment type and who can manage it without exposing credentials.
 - [ ] The handoff states whether app data is shared or isolated by authenticated user.
 - [ ] A new developer is told what account, project selection, or scoped key is required before a future backend deployment.
-- [ ] Reads, writes, and realtime updates work through production Convex.
+- [ ] Reads, writes, and realtime updates work through the selected publicly reachable Convex deployment.
 - [ ] The final response begins with the clickable Sites URL and includes the future-update instruction.
 - [ ] The final response explains how to reopen the Site in ChatGPT Sites and manage it through Settings.
 - [ ] A stopped workflow reports the last completed state and the next required action.
+
+For a temporary shared preview, also confirm:
+
+- [ ] The Convex backend is an isolated cloud dev deployment owned by the confirmed team/project.
+- [ ] Its deploy key is scoped only to that deployment and is absent from browser code and the Sites bundle.
+- [ ] Its exact expiration is reported without guessing.
+- [ ] The handoff says `Temporary shared preview`, not production.
+- [ ] The user is told what stops working when the deployment expires.
+- [ ] The handoff explains whether visitors share data and how to promote the app to production.
+
+## Promote a temporary preview to production
+
+1. Confirm the intended Convex team, project, and production deployment.
+2. Configure the required production environment variables separately; preview values do not automatically transfer.
+3. Deploy the functions and schema with `npx convex deploy` using production authorization.
+4. Decide explicitly whether preview data should be discarded, exported and migrated, or recreated. Never imply automatic data promotion.
+5. Capture the exact production Convex URL and rebuild Sites with it.
+6. Confirm the Sites bundle contains neither the preview URL nor any key or backend secret.
+7. Save and deploy a new Sites version, verify `get_site.current_live_url`, and repeat production read/write/realtime QA.
+8. Retire the preview deployment or let it expire only after the production handoff succeeds and the user approves any cleanup.
 
 ## Required final-response templates
 
 Use the applicable template after all checks pass. The clickable URL must be the first item in the response.
 
-After the opening paragraph, add: the exact Sites access mode; whether ChatGPT/OpenAI sign-in is required; production Convex deployment type; backend owner or manager; whether data is shared or isolated; and what a new developer needs for the next backend deployment. Never include credentials.
+After the opening paragraph, add: the exact Sites access mode; whether ChatGPT/OpenAI sign-in is required; Convex deployment type; backend owner or manager; whether data is shared or isolated; and what a new developer needs for the next backend deployment. Never include credentials.
+
+### Temporary shared preview
+
+Your temporary shared preview is live: [Open the Site](SITE_URL)
+
+This is not production. It uses an isolated Convex Cloud dev deployment that expires at EXPIRATION. The Site access mode is ACCESS_MODE, and VISITOR_SIGN_IN. Visitors do not need Convex accounts. DATA_BEHAVIOR.
+
+After expiration, the Sites URL may still open, but backend reads, writes, schedules, and realtime updates will stop. To promote it, configure and deploy the confirmed production Convex backend, decide how to handle preview data, rebuild Sites with the production URL, save and deploy a new version, and repeat live QA.
+
+For future updates, ask Codex: ‘Build, validate, and publish the latest version to Codex Sites.’
+
+To manage this Site later, open Sites in ChatGPT or visit https://chatgpt.com/sites, select the Site, then open Settings.
 
 ### Private Site
 
@@ -294,6 +371,8 @@ Sources:
 - https://docs.convex.dev/production/overview
 - https://docs.convex.dev/cli/reference/dev
 - https://docs.convex.dev/cli/reference/deploy
+- https://docs.convex.dev/cli/reference/deployment
+- https://docs.convex.dev/production/multiple-deployments
 - https://docs.convex.dev/client/react/deployment-urls
 - https://docs.convex.dev/ai/convex-mcp-server
 - https://docs.convex.dev/cli/agent-mode

@@ -2,6 +2,8 @@
 
 Read the current official page before provisioning: https://docs.convex.dev/cli/agent-mode.
 
+For deployment creation, expiration, selection, and scoped tokens, also read https://docs.convex.dev/cli/reference/deployment and https://docs.convex.dev/production/multiple-deployments.
+
 Read [accounts-access-and-ownership.md](accounts-access-and-ownership.md) before deciding whether the environment is accountless, using saved developer credentials, or using a scoped key.
 
 ## Select the correct mode
@@ -11,6 +13,7 @@ Read [accounts-access-and-ownership.md](accounts-access-and-ownership.md) before
 | Local agent development | `npm install` then `npx convex dev --once` | No login or deploy key required |
 | Interactive local preview | Keep `npx convex dev` running beside Sites | Uses the selected local or developer deployment |
 | Cloud-agent development | Create an isolated cloud dev deployment and mint a deployment-scoped key | Scoped key required; never share a broad personal credential |
+| Temporary shared preview | Publish Sites against an isolated, expiring cloud dev deployment | Scoped key for developers; visitors need no Convex account |
 | Production publishing | Deploy to a Convex cloud project, then rebuild Sites with its production URL | Convex project/account required |
 | Site visitors | Browser connects through the public Convex URL | No Convex account; product auth is separate |
 
@@ -36,6 +39,33 @@ The local backend runs as a subprocess of `npx convex dev` and stops when that p
 Use an isolated cloud dev deployment only when the agent needs cloud capabilities such as public HTTP traffic, dashboard access, default environment variables, or integrations unavailable locally. Follow the current Agent Mode page to create the deployment and mint a key scoped only to it.
 
 Never give a cloud agent a default personal deployment or broadly scoped production credentials.
+
+For a new isolated deployment, confirm the intended team and project, choose an expiration, and follow the current CLI form:
+
+```bash
+npx convex deployment create --type dev --select \
+  team-slug:project-slug:dev/agent/app-name \
+  --expiration "in 5 days"
+npx convex deployment token create agent-token --save-env
+npx convex dev --once
+```
+
+Set required deployment environment variables after creating or selecting the deployment and before pushing functions. Prefer project defaults when every new cloud deployment should inherit the same names; otherwise use `npx convex env set` without printing values. Keep `CONVEX_DEPLOY_KEY` in an ignored environment file and verify it never enters browser code or the Sites bundle.
+
+## Temporary shared Sites preview
+
+An isolated cloud dev deployment is publicly reachable and may back a temporary shared Codex Site. Treat this as an explicit preview exception to the production-only publishing path:
+
+1. Confirm the Convex team, project, isolated dev deployment, and exact expiration.
+2. Reuse a suitable isolated deployment or create one with `--type dev`, `--select`, and `--expiration`.
+3. Mint or reuse only a deployment-scoped dev key.
+4. Configure required backend environment variables, then run `npx convex dev --once`.
+5. Build Sites with that deployment's public `convex.cloud` URL.
+6. Confirm Sites access before saving and deploying the version.
+7. Verify reads, writes, and realtime updates through the live Site.
+8. Label the result `Temporary shared preview`, report the expiration, and explain that the Site may remain reachable after the backend expires but its data operations will fail.
+
+Do not call this production, use a production key, or imply that preview data automatically moves to production.
 
 ## Sites ordering
 
