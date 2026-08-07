@@ -27,11 +27,39 @@ Apply the hosted management, environment-layer, and update rules in [sites-setti
 
 ## Copy-paste prompts
 
-Use the first prompt for a local preview. An anonymous local deployment cannot power a published `.chatgpt.site` URL. Use the second prompt for a temporary shared preview backed by an expiring Convex Cloud dev deployment. Use the third prompt to move the app to Convex Cloud production.
+Use the first prompt by default for any request to publish, deploy, share, ship, or return a live URL. Use the second only for localhost development with no shareable URL. Use the third only for an explicitly temporary, expiring shared preview.
 
 Open the app folder in Codex, start a task, and paste one complete prompt into the task. Codex runs the commands in its integrated terminal. Users who want to run commands themselves should open the terminal at the project root, the folder containing `package.json`. See https://learn.chatgpt.com/docs/integrated-terminal.
 
-### Accountless local development
+### Default: Build and publish a durable shared Site
+
+```text
+$codex-sites-convex Build, validate, and publish this app as a durable shared
+Codex Site backed by Convex production.
+
+Build and validate locally first, including a Convex query, mutation, and
+realtime update. Register or reuse the Codex Site, inspect its current access
+and publication state, and explain whether visitors share data. Get explicit
+authorization before changing access to public; preserve an already-public
+policy without asking for the same change again.
+
+Link or select the correct Convex Cloud project. Announce the exact production
+team, project, deployment, URL, and expected changes. Get my fresh target-specific
+confirmation immediately before deploying Convex production. Deploy Convex and
+capture its exact production convex.cloud URL.
+
+Only then set NEXT_PUBLIC_CONVEX_URL in Sites as non-secret public configuration
+and rebuild. Fail if the browser bundle contains localhost, the development URL,
+a deployment key, or a backend secret, or lacks the exact production URL.
+
+Push the exact validated source commit, save one Sites version from that commit,
+deploy it, and poll to success or failure. Require the deployment URL and a
+matching nonempty get_site.current_live_url. Open the Site and verify live HTTPS,
+Convex reads, writes, and realtime updates. Return the copyable live URL first.
+Do not stop at an intermediate state unless authorization or the platform blocks.
+```
+
+### Local-only development
 
 ```text
 $codex-sites-convex Set up this app for accountless local development with
@@ -43,10 +71,11 @@ Convex API exists before starting the frontend. Keep one Convex watcher and one
 Sites development server running, then verify a query, mutation, and realtime
 update locally. Give me the localhost URL. Do not require a Convex login, create
 a second frontend or database, publish the Site, or claim the local backend can
-power a .chatgpt.site URL.
+power a .chatgpt.site URL. Accountless mode does not create hosted Sites
+environment variables.
 ```
 
-### Temporary shared preview with Cloud Agent Mode
+### Temporary preview with Cloud Agent Mode
 
 ```text
 $codex-sites-convex Publish this app as a temporary shared preview using Convex
@@ -74,48 +103,6 @@ whether visitors share data, what stops working after expiration, and the exact
 steps required to promote the app to production.
 ```
 
-### Production backend and Sites URL
-
-```text
-$codex-sites-convex Move this validated local app to production and publish it
-with Codex Sites.
-
-First rerun the local production build. Inspect .openai/hosting.json without
-displaying secrets. If it lacks a valid project_id, create the Site exactly
-once, save its project ID, and call get_site to confirm the hosted record.
-Check list_sites or the Sites UI separately for sidebar visibility. If indexing
-is delayed, keep the existing project ID and do not create a duplicate. Explain
-that this registers the Site but does not save a version or publish it.
-
-Next inspect the current Convex configuration without displaying credentials.
-Tell me whether this folder is connected to Convex Cloud. Confirm the Convex
-account, team, project, and exact production deployment with me before making
-production changes.
-
-If Convex Cloud is not configured, walk me through signing in, choosing or
-creating the correct project, and linking this folder. Do not select an
-unrelated project or create a project without telling me.
-
-List the production environment variable names the app requires. Show me how
-to enter secret values securely through the Convex dashboard or CLI. Never ask
-me to paste secret values into chat.
-
-Announce the exact production target and explain what the deployment will
-change. Get my fresh confirmation before deploying.
-
-Deploy Convex first, capture the exact production convex.cloud URL, and rebuild
-the Codex Site with that URL. Confirm the browser bundle contains no localhost
-URL, development deployment URL, deploy key, or backend secret.
-
-Save the production Sites build as a version, then publish it privately unless
-I approve another audience. Wait for the Sites deployment to finish. Require a
-nonempty get_site.current_live_url before calling the Site published. Verify a
-query, mutation, and realtime update through that live Site. Confirm its access
-mode, open the Site, then give me the exact .chatgpt.site URL and management
-instructions. If work stops, report the last completed Sites state and the next
-required action. Do not add product authentication unless I request it.
-```
-
 ## Distinguish the four Sites states
 
 | State | What proves it | What it does not prove |
@@ -126,6 +113,21 @@ required action. Do not add product authentication unless I request it.
 | Published Site | Deployment succeeded and `get_site.current_live_url` is nonempty and matches the deployment URL | Nothing further about application correctness; complete production QA separately |
 
 Do not infer registration from `.openai/hosting.json` alone. Do not infer publication from registration, a saved version, deployment initiation, or a deployment URL that `get_site.current_live_url` does not confirm.
+
+### Recover a registered, public, but unpublished Site
+
+The combination below is not a partial publication; it is an unpublished Site that still needs the complete production path:
+
+- valid `project_id` and confirmed registration;
+- `access_level: public`;
+- `latest_version_number: 0`;
+- `current_live_url: null`;
+- no Sites environment variables;
+- frontend still targeting accountless local Convex.
+
+Preserve the already-public access policy and do not request the same access change again. Continue by linking the intended Convex Cloud project, announcing the exact production target, obtaining fresh consent immediately before production deployment, deploying Convex, setting the exact production URL as non-secret Sites configuration, rebuilding and scanning the bundle, pushing the exact validated source commit, saving and deploying a Sites version, polling to success, requiring `get_site.current_live_url`, and completing live QA.
+
+Use `scripts/check-publication-state.sh tests/fixtures/registered-public-unpublished.json` for the regression fixture. Exit status `1` is expected because the fixture is unpublished; the output must list the full recovery path.
 
 ### Register early for publication work
 
@@ -176,10 +178,11 @@ Use this only after development checks pass:
 
 1. Confirm the developer is authenticated to the intended Convex project, or that a production-scoped `CONVEX_DEPLOY_KEY` is configured for the deployment workflow.
 2. Configure production-only backend environment variables in Convex. Local `.env.local` values are not automatically backend environment variables. Use the dashboard or `npx convex env set --prod NAME`, without exposing secret values in logs or browser variables.
-3. Run `npx convex deploy`. This deploys to the project's production deployment when the local project is configured through `CONVEX_DEPLOYMENT`; when `CONVEX_DEPLOY_KEY` is set, it deploys to the deployment scoped by that key.
-4. Capture the production Convex URL returned by the deployment workflow or deployment settings.
-5. Configure the Sites production-build public environment variable with that production URL.
-6. Run a clean frontend production build. Inspect the built configuration and ensure it does not reference a local or development Convex URL.
+3. Announce the exact team, project, production deployment, known URL, and expected changes. Obtain fresh target-specific consent immediately before deployment, even if Sites is already public.
+4. Run `npx convex deploy`. This deploys to the project's production deployment when the local project is configured through `CONVEX_DEPLOYMENT`; when `CONVEX_DEPLOY_KEY` is set, it deploys to the deployment scoped by that key.
+5. Capture the exact production Convex URL returned by the deployment workflow or deployment settings.
+6. Only now configure Sites `NEXT_PUBLIC_CONVEX_URL` with that production URL as non-secret public configuration.
+7. Run a clean frontend production build. Run `scripts/check-production-bundle.sh BUILD_DIR PRODUCTION_URL DEVELOPMENT_URL` and fail unless the exact production URL is present and localhost, the development URL, and credential markers are absent.
 
 Never use `npx convex dev` as the production deployment step, and never publish a Sites bundle connected to a development backend.
 
@@ -206,18 +209,21 @@ Example intent mapping:
 ## Publish a new version
 
 1. Confirm the local build passed and the early registration checkpoint produced a valid `project_id` confirmed by `get_site`.
-2. Deploy Convex functions and schema with the current Convex deployment workflow.
-3. Obtain and record the production Convex URL. A Convex cloud project/account is required for developers managing or publishing this backend.
-4. Configure the Sites production-build environment with that public URL.
-5. Stop stale development bundles and rebuild the frontend cleanly with the production URL.
-6. Call `save_site_version` once for that exact production build and retain its version identifier. Report `Saved Sites version`, not `Published Site`.
-7. Resolve the desired access mode. Prefer the private deployment path when public access was not explicitly authorized. If public or shared deployment requires approval, state the resolved access level and wait for authorization.
-8. Deploy the saved version with the Sites hosting workflow and retain the deployment identifier.
-9. Poll `get_deployment_status` until it returns `succeeded` or `failed`. Do not treat an intermediate state as completion.
-10. On success, require a non-null deployment `url` and retain that exact value. Never guess, derive, or reconstruct a URL from a slug.
-11. Call `get_site` with the registered `project_id`. Require a nonempty `current_live_url`, confirm that it matches the successful deployment `url`, and inspect the current access configuration.
-12. Only now report `Published Site`, open the confirmed `current_live_url` in Codex, and complete production QA.
-13. Return the clickable Sites URL as the first item in the final answer.
+2. Call `get_site`; inspect access, version, live URL, and environment-variable names. Explain whether visitors share data. Preserve an already-public policy; otherwise obtain authorization before changing access to public.
+3. Confirm and announce the exact Convex production target, then obtain fresh consent immediately before deploying its functions and schema.
+4. Obtain the exact production Convex URL. A Convex cloud project/account is required for developers managing or publishing this backend.
+5. Configure Sites `NEXT_PUBLIC_CONVEX_URL` as non-secret public configuration only after the production URL is known.
+6. Stop stale development bundles and rebuild cleanly. Run the production-bundle check and reject localhost, the development deployment URL, credential markers, or a missing production URL.
+7. Commit the exact validated source, push that commit, and package that selected commit using the Sites hosting workflow.
+8. Call `save_site_version` once for that exact build and source commit. Retain its version identifier and report `Saved Sites version`, not `Published Site`.
+9. Deploy the saved version with the Sites hosting workflow and retain the deployment identifier.
+10. Poll `get_deployment_status` until it returns `succeeded` or `failed`. Do not treat an intermediate state as completion.
+11. On success, require a non-null deployment `url` and retain that exact value. Never guess, derive, or reconstruct a URL from a slug.
+12. Call `get_site` with the registered `project_id`. Require a nonempty `current_live_url`, confirm that it matches the successful deployment `url`, and inspect the current access configuration.
+13. Only now report `Published Site`, open the confirmed `current_live_url` in Codex, and complete live HTTPS, read, write, and realtime QA.
+14. Return the clickable Sites URL as the first item in the final answer.
+
+When publication was requested, do not stop after local validation, Convex linking, Site registration, an access change, or environment-variable creation. Continue until the live URL and live QA gates pass unless authorization or a platform failure blocks the workflow.
 
 If deployment fails or work pauses, report the last completed state and one next required action. Examples:
 
@@ -293,6 +299,10 @@ Sharing or widening access is an external side effect. Ask before changing the a
 - [ ] `get_site.current_live_url` matches the successful deployment URL.
 - [ ] The handoff does not call the Site published unless `get_site.current_live_url` is nonempty.
 - [ ] The current access mode is reported accurately.
+- [ ] An already-public policy was preserved without repeating the access-change request.
+- [ ] Fresh target-specific authorization was obtained immediately before Convex production deployment.
+- [ ] The finished bundle contains the exact production URL and no localhost, development URL, or deployment credential marker.
+- [ ] The saved Sites version came from the exact validated, pushed source commit.
 - [ ] Private login requirements are explained when applicable.
 - [ ] The user is told that visitors do not need Convex accounts.
 - [ ] The handoff names the selected Convex deployment type and who can manage it without exposing credentials.

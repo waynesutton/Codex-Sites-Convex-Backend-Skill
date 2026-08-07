@@ -35,6 +35,10 @@ See [sites-settings-and-environment.md](sites-settings-and-environment.md) for S
 
 These states are cumulative but not interchangeable. `.openai/hosting.json` without a valid `project_id` is only a local manifest. A returned deployment URL is provisional until `get_site.current_live_url` confirms the live Site.
 
+An access policy is not a lifecycle state. `public` means anyone with the URL may visit, but it does not create a version or deployment. A registered public Site with no saved version and `current_live_url: null` is unpublished.
+
+For publish or share intent, the default architecture path is: local validation → registered Site → confirmed Convex Cloud production target and fresh deployment consent → production Convex URL → Sites public configuration → clean scanned build → exact validated source commit → saved Sites version → Sites deployment → matching nonempty `current_live_url` → live HTTPS/read/write/realtime QA.
+
 ## Account boundaries
 
 See [accounts-access-and-ownership.md](accounts-access-and-ownership.md) for the account matrix, safe credential detection, ownership rules, Sites access, and application authentication. The essential boundary is: Sites controls who can open the frontend; Convex application authorization controls which data an app user can read or change.

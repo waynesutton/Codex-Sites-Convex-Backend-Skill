@@ -55,12 +55,13 @@ When a user with an accountless local backend asks to publish:
 2. Tell the user they must sign in to or create a Convex account, or provide a production-scoped deployment key owned by their team.
 3. Follow the latest official Convex instructions to link or select the intended project.
 4. Confirm the intended Convex team, project, and production deployment before deploying.
-5. Deploy the backend to production.
-6. Capture the exact production Convex URL.
-7. Configure the Sites production build with that URL.
-8. Rebuild Sites cleanly.
-9. Publish Sites with the authorized Sites access mode.
-10. Verify reads, writes, and realtime updates through the published Sites URL.
+5. Announce the exact production team, project, deployment, known URL, and expected changes; obtain fresh target-specific consent immediately before deployment.
+6. Deploy the backend to production.
+7. Capture the exact production Convex URL.
+8. Configure Sites `NEXT_PUBLIC_CONVEX_URL` as non-secret public configuration only after that URL is known.
+9. Rebuild Sites cleanly and scan the browser bundle.
+10. Push the exact validated source commit, save and deploy the Sites version, and require `get_site.current_live_url`.
+11. Verify reads, writes, and realtime updates through the published Sites URL.
 
 Do not publish a bundle containing `127.0.0.1`, `localhost`, a local deployment URL, or an unintended development deployment.
 
@@ -81,6 +82,8 @@ The Sites frontend and its URL do not automatically expire with Convex. Warn tha
 ## Separate Sites access from application authentication
 
 Changing a Site from `custom` to `public` changes only the Codex Sites visitor gate. It does not deploy Convex, move Convex data, change the Convex plan, or create Convex visitor accounts. It requires explicit user authorization.
+
+If `get_site` already reports `public`, preserve that setting and do not request the same access-policy change again. Continue the publication lifecycle. Fresh target-specific authorization is still required immediately before every Convex production deployment.
 
 | Sites mode | Who can open the frontend? |
 | --- | --- |

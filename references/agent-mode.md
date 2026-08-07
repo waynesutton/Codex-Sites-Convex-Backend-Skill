@@ -34,6 +34,8 @@ Local mode is best for ephemeral development that does not require inbound publi
 
 The local backend runs as a subprocess of `npx convex dev` and stops when that process stops. It cannot serve a published Codex Site. Never infer accountless mode only from the absence of a login prompt; saved CLI credentials may have been reused.
 
+Accountless provisioning may write a local `NEXT_PUBLIC_CONVEX_URL` to `.env.local`. It does not create or update the hosted Sites environment. Linking the folder to Convex Cloud provides managed development and production deployments, but Sites must receive the exact production URL separately after production deployment is selected and deployed.
+
 ## Cloud-agent development
 
 Use an isolated cloud dev deployment only when the agent needs cloud capabilities such as public HTTP traffic, dashboard access, default environment variables, or integrations unavailable locally. Follow the current Agent Mode page to create the deployment and mint a key scoped only to it.
@@ -77,5 +79,7 @@ Do not call this production, use a production key, or imply that preview data au
 6. Keep `npx convex dev` running for an interactive preview.
 
 If Sites started before step 3, restart it exactly once after the environment file is ready.
+
+For a durable publish/share request, local Agent Mode is only the validation stage. Continue by confirming the Convex Cloud production target, obtaining fresh target-specific deployment consent, running `npx convex deploy`, capturing the exact production URL, setting Sites `NEXT_PUBLIC_CONVEX_URL` as non-secret public configuration, rebuilding, and completing the Sites save/deploy/live-QA workflow. Never place `CONVEX_DEPLOY_KEY`, an admin key, or a backend secret in Sites public environment or browser code.
 
 Use only the correct documentation index URL: https://docs.convex.dev/llms.txt.

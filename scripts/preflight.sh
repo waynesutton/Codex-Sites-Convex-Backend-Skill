@@ -57,7 +57,22 @@ fi
 echo "SAVED SITES VERSION: REMOTE CHECK REQUIRED: local files do not prove a saved version"
 echo "PUBLISHED SITE: REMOTE CHECK REQUIRED: require get_site.current_live_url"
 [[ -f package.json ]] && echo "FOUND: package.json" || echo "NOT FOUND: package.json"
-[[ -d convex ]] && echo "FOUND: convex backend" || echo "NOT FOUND: convex/"
+has_convex_dependency=0
+has_convex_source=0
+if [[ -f package.json ]] && rg -q '"convex"[[:space:]]*:' package.json; then
+  has_convex_dependency=1
+fi
+if [[ -d convex || -f convex.json ]]; then
+  has_convex_source=1
+fi
+
+if [[ "$has_convex_dependency" -eq 1 && "$has_convex_source" -eq 1 ]]; then
+  echo "CONVEX PROJECT: CONFIRMED: package dependency and source/config marker found"
+elif [[ "$has_convex_dependency" -eq 1 || "$has_convex_source" -eq 1 ]]; then
+  echo "CONVEX PROJECT: PARTIAL: require both package dependency and convex/ or convex.json"
+else
+  echo "CONVEX PROJECT: NOT FOUND"
+fi
 [[ -f convex/_generated/api.d.ts || -f convex/_generated/api.js ]] && echo "FOUND: generated Convex API" || echo "NOT FOUND: generated Convex API"
 [[ -f AGENTS.md ]] && echo "FOUND: AGENTS.md" || echo "NOT FOUND: AGENTS.md"
 if [[ -f .env.local ]] && rg -q '^NEXT_PUBLIC_CONVEX_URL=.+$' .env.local; then

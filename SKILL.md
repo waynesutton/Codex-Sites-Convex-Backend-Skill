@@ -7,6 +7,14 @@ description: Build, extend, validate, and publish a Codex Sites application whos
 
 Build the complete application, validate both halves, and publish it unless the user explicitly requests local-only work.
 
+## Choose the workflow
+
+- **Default: durable shared Site.** When the user asks to publish, deploy, share, ship, or provide a URL without explicitly requesting a temporary preview, use Convex Cloud production and complete the Sites lifecycle through a confirmed live `.chatgpt.site` URL.
+- **Local-only development.** Use accountless Agent Mode only when the user explicitly wants localhost development without publishing. It creates no shareable URL.
+- **Temporary preview.** Use an isolated, expiring Convex Cloud dev deployment only when the user explicitly requests a temporary preview. Label it non-production and report its expiration.
+
+Do not stop a publication workflow after local validation, cloud linking, Site registration, an access change, or environment configuration. Continue through the saved Sites version, deployment, nonempty `get_site.current_live_url`, and live QA unless a real authorization or platform blocker prevents progress.
+
 ## Non-negotiable architecture
 
 - Keep the frontend, frontend build, published URL, and sharing in Codex Sites.
@@ -21,7 +29,7 @@ Build the complete application, validate both halves, and publish it unless the 
 - Always read [references/architecture.md](references/architecture.md).
 - Before selecting a Convex environment or explaining accounts, access, ownership, or authentication, read [references/accounts-access-and-ownership.md](references/accounts-access-and-ownership.md).
 - Before publishing or changing a published Site, hosted environment variable, connected Convex deployment, or sharing setting, read [references/sites-settings-and-environment.md](references/sites-settings-and-environment.md).
-- For a new project, read [references/bootstrap.md](references/bootstrap.md).
+- Before configuring the Convex plugin, MCP, skills, or managed AI files, read the current official [Convex agent setup guide](https://www.convex.dev/agent-setup.md) and [references/bootstrap.md](references/bootstrap.md).
 - Before provisioning any development backend, read [references/agent-mode.md](references/agent-mode.md).
 - Before editing `convex/`, read [references/convex-rules.md](references/convex-rules.md).
 - Before selecting backend packages or implementing a capability, read [references/components.md](references/components.md).
@@ -55,6 +63,8 @@ Classify the task:
 - **Existing Convex project without Sites:** preserve `convex/` and initialize the Sites frontend around it; do not scaffold another product app.
 - **Both already present:** make only the requested product changes.
 
+Confirm an existing Convex project only when the same project root has both a `convex` dependency in `package.json` and either `convex/` or `convex.json`. In a monorepo, use the nearest unambiguous matching root. Do not install managed Convex AI files when project ownership is missing or ambiguous.
+
 ### 2. Prepare or preserve the Sites frontend
 
 For a new project, use the installed Sites building workflow to initialize the local project files, but do not start or open the Sites server yet. This cross-product ordering overrides the usual Sites-only preview order: provision Convex and pass the backend-readiness gate first. Treat `.openai/hosting.json` as a local hosting manifest, not proof of registration; only a valid nonempty `project_id` identifies a registered Site. Do not replace the project's vinext/Vite/Cloudflare Worker structure.
@@ -68,8 +78,10 @@ Use the current Convex workflow rather than hand-writing setup. Prefer the calla
 ```bash
 npm install convex
 npx convex dev
-npx convex ai-files install
+npx convex ai-files status
 ```
+
+For a confirmed Convex project, run `npx convex ai-files install` only when status reports missing or stale files. Let the CLI manage `AGENTS.md`, `CLAUDE.md`, `convex.json`, generated guidance, and project skills; never reproduce or edit managed sections by hand. Read `convex/_generated/ai/guidelines.md` completely before editing `convex/` when it exists.
 
 For accountless local agent development, use the supported non-interactive flow:
 
@@ -79,6 +91,8 @@ npx convex dev --once
 ```
 
 Do not require login and do not set the legacy `CONVEX_AGENT_MODE=anonymous` flag. In a non-interactive shell with no configured deployment or deploy key, Convex automatically provisions a local backend.
+
+Accountless Agent Mode is local-only. It may write the local frontend URL to `.env.local`, but it does not create a hosted Sites environment variable and cannot power a published Site. Linking the folder to Convex Cloud provides managed development and production deployments; it does not by itself publish Sites.
 
 After provisioning, run `scripts/check-backend-ready.sh`. Do not start the Sites server or open a browser until `.env.local` contains a nonempty `NEXT_PUBLIC_CONVEX_URL` and the generated Convex API exists.
 
@@ -108,7 +122,11 @@ Use `scripts/check-components.sh <keywords>` for a quick catalog search. Treat i
 
 ### 5. Configure development assistance
 
-When Convex MCP is unavailable, tell the user to add this to `~/.codex/config.toml` and restart Codex:
+Follow https://www.convex.dev/agent-setup.md. Prefer the full official Convex plugin for Codex because it includes skills and MCP. Inspect and verify the marketplace and installed plugin before changing anything. When the plugin succeeds, do not install separate Convex skills or add a duplicate MCP server.
+
+Run applicable setup commands directly. Ask the user only when approval, authentication, a user-interface action, or a restart is required. Preserve unrelated settings and repository changes.
+
+When the full plugin is unavailable, use the fallback integration. Add this entry to `~/.codex/config.toml` without replacing unrelated configuration, then restart Codex:
 
 ```toml
 [mcp_servers.convex]
@@ -116,7 +134,7 @@ command = "npx"
 args = ["-y", "convex@latest", "mcp", "start"]
 ```
 
-Continue implementing without MCP when normal CLI access is sufficient. Do not enable broad production access by default.
+Verify the selected integration with plugin listing, AI-file status, and MCP health where available; install success alone is insufficient. Report setup as partial with the exact remaining action when verification fails or a restart is pending. Continue implementing without MCP when normal CLI access is sufficient. Do not enable broad production access by default.
 
 ### 6. Start exactly one Sites server
 
@@ -186,11 +204,30 @@ If a hydration warning mentions attributes injected by Grammarly or another brow
 
 Read and follow [references/deployment-and-qa.md](references/deployment-and-qa.md) completely.
 
-Lifecycle order: local Sites project → registered Site → Convex production backend → production Convex URL → Sites production build → saved Sites version → Sites deployment → live URL and access verification.
+Deployment order: Convex backend → production Convex URL → Sites production build → Sites publish → URL and access verification.
 
-Before publishing, resolve whether the Site should be public or require sign-in. Default to private when the user has not requested public access. Explain the resolved access mode and obtain explicit authorization before public publishing or any access-list change.
+The complete durable-publication lifecycle is:
 
-An accountless local backend cannot power a published Site. Before production deployment, confirm the intended Convex team, project, production deployment, and authorized account or production-scoped key. Reject any production bundle containing localhost, `127.0.0.1`, a local URL, or an unintended development deployment.
+1. Build and validate locally, including a Convex query, mutation, and realtime update.
+2. Register the Site once or reuse its valid `project_id`, then call `get_site`.
+3. Inspect `access_level`, `latest_version_number`, `current_live_url`, Sites environment-variable names, and the frontend's current Convex URL without displaying credentials.
+4. Explain whether visitors share Convex data. If public access is requested and the Site is not public, obtain explicit authorization before changing access. If it is already public, preserve that policy and do not request the same access change again.
+5. Link or select the intended Convex Cloud project. Announce the exact production team, project, deployment, and known public URL, plus what the deployment will change.
+6. Immediately before `npx convex deploy`, obtain fresh, target-specific production authorization even when Sites access is already public.
+7. Deploy Convex production and capture the exact production `convex.cloud` URL.
+8. Only after that URL is known, set Sites `NEXT_PUBLIC_CONVEX_URL` as non-secret public configuration. Never put a deploy key, admin key, or backend secret in Sites public environment variables.
+9. Rebuild the frontend with the production URL. Run `scripts/check-production-bundle.sh BUILD_DIR PRODUCTION_URL DEVELOPMENT_URL`; fail if the bundle contains localhost, the development URL, a deployment key marker, or lacks the exact production URL.
+10. Commit the exact validated source, push that commit, package the selected commit, and call `save_site_version` once for that build.
+11. Deploy the saved version and poll `get_deployment_status` until success or failure.
+12. On success require a non-null deployment `url`, call `get_site`, and require `current_live_url` to be nonempty and match the deployment URL.
+13. Open the canonical live URL and verify HTTPS plus Convex read, write, and realtime behavior through the published Site.
+14. Return the copyable clickable Sites URL as the first item in the final answer.
+
+Before publishing, resolve whether the Site should be public or require sign-in. Default to private when the user has not requested public access. Explain the resolved access mode and obtain explicit authorization before changing to public or changing any access list. Public access is an access policy, not a deployment, and never proves that the Site is published.
+
+An accountless local backend cannot power a published Site. Before production deployment, confirm the intended Convex team, project, production deployment, and authorized account or production-scoped key. Obtain fresh consent immediately before every production deployment. Reject any production bundle containing localhost, `127.0.0.1`, a local URL, an unintended development deployment, or a deployment credential.
+
+Treat this recovery state as **registered and public but unpublished**: valid `project_id`, `access_level: public`, `latest_version_number: 0`, `current_live_url: null`, no Sites environment variables, and a frontend still targeting accountless local Convex. Preserve public access, but complete cloud linking, fresh production authorization, production deployment, Sites public configuration, clean rebuild and scan, exact-commit save and deploy, live URL confirmation, and production QA. Use `scripts/check-publication-state.sh` with a normalized state file when diagnosing this case.
 
 For an explicitly requested temporary shared preview, follow the Cloud Agent Mode path in [references/agent-mode.md](references/agent-mode.md) and [references/deployment-and-qa.md](references/deployment-and-qa.md). Confirm the team and project; reuse only a suitable isolated cloud dev deployment or create one with an explicit expiration; use only deployment-scoped access; configure its environment; push with `npx convex dev --once`; and build Sites with its public `convex.cloud` URL. Confirm Sites access before publishing. Never expose the deploy key, call the backend production, or imply that preview data automatically transfers to production.
 
@@ -219,5 +256,5 @@ Finish only when:
 - the published connection was tested when publishing was requested;
 - the handoff states Sites access, visitor sign-in, Convex backend ownership, Convex deployment type, shared versus per-user data, and future developer requirements without exposing credentials;
 - a temporary shared preview is labeled non-production and reports its exact backend expiration, failure behavior, data-sharing model, and production-promotion steps;
-- the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker.
+- the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker;
 - every incomplete handoff names the last completed Sites state and the next required action.

@@ -74,6 +74,7 @@ Visitor browser
 - Convex validators, authentication, and authorization still protect backend operations.
 - Site visitors never need Convex accounts.
 - A public Site without product authentication may expose shared application data to every visitor.
+- Accountless Agent Mode may configure `.env.local`, but it does not create hosted Sites environment variables.
 
 ## Keep the three environment layers separate
 
@@ -84,6 +85,8 @@ Visitor browser
 | Convex deployment | Convex dashboard deployment settings or Convex CLI environment commands | Secrets and configuration read by Convex functions | Convex functions do not read frontend `.env.local`. Development and production values are separate. Third-party keys used by actions belong here. Set production values on production. |
 
 A Secret switch cannot make a browser-public variable safe. Never copy a Convex backend secret into `NEXT_PUBLIC_*`, `VITE_*`, or another browser-public variable.
+
+For production, set hosted `NEXT_PUBLIC_CONVEX_URL` only after the exact production deployment URL is known. Treat it as non-secret public configuration. Linking Convex Cloud or setting Sites access does not populate this value automatically.
 
 ## Environment-variable reference
 
@@ -120,7 +123,7 @@ It must not contain:
 - third-party secrets;
 - hosted runtime environment values.
 
-A valid nonempty `project_id` identifies the registered Sites project. Confirm it with `get_site`; it is not a Convex project ID and does not connect the user's Convex account. Registration does not prove that a build was saved as a version or deployed.
+A valid nonempty `project_id` identifies the registered Sites project. Confirm it with `get_site`; it is not a Convex project ID and does not connect the user's Convex account. Registration does not prove that a build was saved as a version or deployed. Likewise, `access_level: public` does not prove publication. A registered public Site with `latest_version_number: 0` and `current_live_url: null` remains unpublished and needs production backend configuration, a clean Sites build, a saved version, a successful deployment, and live URL verification.
 
 The lifecycle states are:
 

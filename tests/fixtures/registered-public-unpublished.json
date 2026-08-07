@@ -1,0 +1,8 @@
+{
+  "project_id": "appgprj_fixture_registered_public",
+  "access_level": "public",
+  "latest_version_number": 0,
+  "current_live_url": null,
+  "sites_environment_variables": [],
+  "frontend_convex_url": "http://127.0.0.1:3210"
+}

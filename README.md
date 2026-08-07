@@ -4,7 +4,7 @@ Build and ship a [Codex Site](https://openai.com/academy/chatgpt-sites/) with [C
 
 > **Live demo:** [Open Daymark Todo](https://daymark-todo.waynesutton.chatgpt.site/). This public demo app shares one list that updates in real time, powered by Convex and Codex Sites. All Todos are cleared every 5 minutes by a Convex cron job. [Learn how cron jobs work](https://docs.convex.dev/scheduling/cron-jobs).
 
-> **Quick start:** Install the skill, restart Codex, then prompt: `$codex-sites-convex Build a realtime project tracker for my team.`
+> **Quick start:** Install the skill, restart Codex, then prompt: `$codex-sites-convex Build and publish a durable shared realtime project tracker for my team.` Publishing or sharing uses Convex production by default and returns a live Sites URL.
 
 ## Why this skill?
 
@@ -22,6 +22,7 @@ Without a dedicated workflow, an agent can scaffold a second frontend, introduce
 - New-project and existing-project paths
 - Codex Sites architecture safeguards
 - Current Convex documentation routing
+- Official [Convex agent setup](https://www.convex.dev/agent-setup.md) checks for plugin, MCP, and managed AI files
 - Official Convex component discovery before implementation
 - Component-specific skill loading when a component is selected
 - Convex schema, validator, index, authorization, and pagination rules
@@ -60,7 +61,7 @@ flowchart LR
     U --> B["Sites build"]
     B --> V["Saved Sites version"]
     V --> D["Sites deployment"]
-    D --> P["Published Site<br/>confirmed by get_site.current_live_url"]
+    D --> LIVE["Published Site<br/>confirmed by get_site.current_live_url"]
 ```
 
 ## Four Codex Sites states
@@ -214,9 +215,9 @@ $codex-sites-convex Add realtime comments, presence, and notifications to this p
 $codex-sites-convex Review this Codex Sites + Convex app, fix backend issues, and publish it.
 ```
 
-## Three prompts for local, temporary, and production deployment
+## Three deployment workflows
 
-Use the local prompt while building. It creates a localhost preview with an accountless Convex backend. Use the temporary prompt for a short-lived shared `.chatgpt.site` preview backed by an isolated cloud dev deployment. Use the production prompt for the durable production backend. An anonymous local backend cannot power a published Site.
+Use the first workflow by default whenever you ask Codex to publish, deploy, share, ship, or provide a live URL. It creates a durable Site backed by Convex production. Choose local-only for localhost development with no shareable URL, or temporary preview for an explicitly expiring cloud preview. Accountless local Convex cannot power a published Site.
 
 ### New to Codex? Start here
 
@@ -227,7 +228,45 @@ Use the local prompt while building. It creates a localhost preview with an acco
 
 You do not need to open a separate Terminal app or type every command yourself. If you prefer to run commands manually, open Codex's integrated terminal in the same project folder and run each command exactly as shown. Read the [Codex integrated terminal guide](https://learn.chatgpt.com/docs/integrated-terminal) or browse the [ChatGPT and Codex documentation](https://learn.chatgpt.com/docs).
 
-### Prompt 1: run locally without a Convex account
+### Default: Build and publish a durable shared Site
+
+```text
+$codex-sites-convex Build, validate, and publish this app as a durable shared
+Codex Site backed by Convex production.
+
+Build and validate locally first. Verify a Convex query, mutation, and realtime
+update. Register the Codex Site once or reuse its project_id, then inspect
+get_site access, latest version, current_live_url, Sites environment-variable
+names, and the frontend Convex URL without displaying credentials.
+
+Explain whether visitors will share Convex data. If public access is needed and
+the Site is not already public, explain the resolved audience and get my explicit
+authorization before changing access. If it is already public, preserve that
+setting and continue without asking for the same access change again. Do not call
+registration or a public policy a publication.
+
+Link or select the correct Convex Cloud project. Announce the exact production
+team, project, deployment, public URL, and expected changes. Get my fresh
+target-specific confirmation immediately before deploying Convex production.
+Deploy Convex first and capture its exact production convex.cloud URL.
+
+Only after that URL is known, set NEXT_PUBLIC_CONVEX_URL in Codex Sites as
+non-secret public configuration and rebuild. Fail if the finished browser bundle
+contains localhost, the development deployment URL, a deployment key, or any
+backend secret, or if it does not contain the exact production URL.
+
+Push the exact validated source commit, save one Sites version from that commit,
+and deploy the saved version. Poll until success or failure. Require a non-null
+deployment URL and a matching nonempty get_site.current_live_url. Then open the
+live Site and verify HTTPS plus Convex read, write, and realtime behavior.
+
+Return the copyable live .chatgpt.site URL as the first item in the final answer.
+Do not stop after local validation, cloud linking, Site registration, access
+configuration, or environment-variable creation unless a real authorization or
+platform blocker occurs. Do not add product authentication unless I request it.
+```
+
+### Local-only development
 
 ```text
 $codex-sites-convex Set up this app for accountless local development with
@@ -239,10 +278,11 @@ Convex API exists before starting the frontend. Keep one Convex watcher and one
 Sites development server running, then verify a query, mutation, and realtime
 update locally. Give me the localhost URL. Do not require a Convex login, create
 a second frontend or database, publish the Site, or claim the local backend can
-power a .chatgpt.site URL.
+power a .chatgpt.site URL. Accountless mode does not create hosted Sites
+environment variables.
 ```
 
-### Prompt 2: publish a temporary shared cloud preview
+### Temporary preview
 
 ```text
 $codex-sites-convex Publish this app as a temporary shared preview using Convex
@@ -270,48 +310,6 @@ whether visitors share data, what stops working after expiration, and the exact
 steps required to promote the app to production.
 ```
 
-### Prompt 3: deploy Convex production and create the Sites URL
-
-```text
-$codex-sites-convex Move this validated local app to production and publish it
-with Codex Sites.
-
-First rerun the local production build. Inspect .openai/hosting.json without
-displaying secrets. If it lacks a valid project_id, create the Site exactly
-once, save its project ID, and call get_site to confirm the hosted record.
-Check list_sites or the Sites UI separately for sidebar visibility. If indexing
-is delayed, keep the existing project ID and do not create a duplicate. Explain
-that this registers the Site but does not save a version or publish it.
-
-Next inspect the current Convex configuration without displaying credentials.
-Tell me whether this folder is connected to Convex Cloud. Confirm the Convex
-account, team, project, and exact production deployment with me before making
-production changes.
-
-If Convex Cloud is not configured, walk me through signing in, choosing or
-creating the correct project, and linking this folder. Do not select an
-unrelated project or create a project without telling me.
-
-List the production environment variable names the app requires. Show me how
-to enter secret values securely through the Convex dashboard or CLI. Never ask
-me to paste secret values into chat.
-
-Announce the exact production target and explain what the deployment will
-change. Get my fresh confirmation before deploying.
-
-Deploy Convex first, capture the exact production convex.cloud URL, and rebuild
-the Codex Site with that URL. Confirm the browser bundle contains no localhost
-URL, development deployment URL, deploy key, or backend secret.
-
-Save the production Sites build as a version, then publish it privately unless
-I approve another audience. Wait for the Sites deployment to finish. Require a
-nonempty get_site.current_live_url before calling the Site published. Verify a
-query, mutation, and realtime update through that live Site. Confirm its access
-mode, open the Site, then give me the exact .chatgpt.site URL and management
-instructions. If work stops, report the last completed Sites state and the next
-required action. Do not add product authentication unless I request it.
-```
-
 Codex will inspect the workspace, preserve existing architecture, check current official Convex components and documentation, implement the smallest complete product, run validation, deploy Convex first, and publish the frontend through Codex Sites.
 
 Remove the optional footer at any time with this one-line prompt:
@@ -326,7 +324,7 @@ The footer follows the Site's resolved theme. It uses the color Convex wordmark 
 
 1. **Inspect** — Classify the workspace and report local, registered, saved-version, and published states separately.
 2. **Prepare Sites** — Keep the existing `.openai/hosting.json`, package manager, and vinext/Vite structure, but treat the manifest as local metadata until a valid `project_id` is confirmed.
-3. **Provision Convex** — Use accountless local development, an isolated expiring cloud dev deployment for a temporary shared preview, or the confirmed production deployment.
+3. **Provision Convex** — Use the confirmed production deployment by default for publish/share requests, accountless local development only for local-only work, or an isolated expiring cloud dev deployment only for a temporary preview.
 4. **Check capabilities** — Refresh the official component catalog and `llms.txt` before implementation.
 5. **Load component instructions** — Read the complete official component `SKILL.md` when one is selected.
 6. **Gate startup** — Require `.env.local`, `NEXT_PUBLIC_CONVEX_URL`, and generated APIs before starting exactly one Sites server.
@@ -334,15 +332,19 @@ The footer follows the Site's resolved theme. It uses the color Convex wordmark 
 8. **Build** — Implement the requested product with generated APIs, real Convex-backed data, and the removable built-with footer.
 9. **Validate** — Run Convex generation, backend checks, frontend build, lint, type checks, and structural verification.
 10. **Register early** — When publication was requested, create the Site exactly once after the local build passes, confirm the hosted record, and check sidebar visibility separately before Convex production setup.
-11. **Save and publish** — Push the selected Convex target, rebuild with its public URL, save a Sites version, deploy it, require `get_site.current_live_url`, and test it in Chrome.
+11. **Save and publish** — Deploy Convex production with fresh target-specific consent, set Sites public configuration only after the production URL is known, rebuild and scan the bundle, push the exact validated source commit, save and deploy that commit, require `get_site.current_live_url`, and complete live QA.
 
 Production lifecycle: local Sites project → registered Site → Convex production backend → production Convex URL → Sites production build → saved Sites version → Sites deployment → live URL and access verification. A temporary preview replaces the production backend and URL steps with an isolated expiring cloud dev deployment and its public URL.
+
+Agent Mode does not collapse these stages. Accountless mode creates a local backend and may write `.env.local`, but it does not create hosted Sites environment variables or a shareable backend. Linking Convex Cloud provides managed development and production deployments. Sites receives `NEXT_PUBLIC_CONVEX_URL` only after the exact production URL is known; deploy keys and backend secrets never belong in Sites public environment or browser bundles.
 
 ## Publishing, URLs, and access
 
 For publication work, the skill registers the Site once after the local build passes. Registration does not save a Sites version or publish it. Sidebar indexing may lag behind successful registration, so check `list_sites` or the Sites UI separately and never create a duplicate after `get_site` succeeds.
 
-After saving and deploying the production version, the skill polls the deployment until success or failure, retains the exact successful deployment URL, and requires a matching nonempty `get_site.current_live_url` before calling the Site published. For an already-published Site, it reads `project_id` from `.openai/hosting.json` and uses `get_site.current_live_url` as canonical. It never guesses a URL from the slug.
+A Site with `public` access, `latest_version_number: 0`, and `current_live_url: null` is still unpublished. If its Sites environment is empty and its frontend targets local accountless Convex, preserve the already-public policy, link the correct Convex Cloud project, obtain fresh production-deployment consent, deploy production, set the non-secret production URL, rebuild and scan, push the exact validated commit, save and deploy a version, then require the live URL and run production QA. Run `scripts/check-publication-state.sh tests/fixtures/registered-public-unpublished.json` to exercise this recovery classification.
+
+After saving and deploying the production version, the skill polls the deployment until success or failure, retains the exact successful deployment URL, and requires a matching nonempty `get_site.current_live_url` before calling the Site published. A public access setting does not create a deployment. For an already-published Site, it reads `project_id` from `.openai/hosting.json` and uses `get_site.current_live_url` as canonical. It never guesses a URL from the slug.
 
 A temporary shared preview follows the same Sites save, deploy, URL, access, and live QA gates, but uses an isolated expiring Convex Cloud dev deployment. Its handoff must label it non-production, report the exact expiration and shared-data behavior, explain what fails after expiration, and include the production-promotion steps. Preview environment values and data do not automatically transfer to production.
 
@@ -525,6 +527,24 @@ Checks the required Sites and Convex structure, generated API, dependency bounda
 
 Confirms `NEXT_PUBLIC_CONVEX_URL` and generated API types exist before the Sites server or browser starts.
 
+### Publication-state recovery
+
+```bash
+./scripts/check-publication-state.sh tests/fixtures/registered-public-unpublished.json
+```
+
+Classifies normalized Sites state. The included regression fixture intentionally exits with status `1` and reports the remaining production, save, deploy, URL, and live-QA actions for a registered public Site that has never been published.
+
+### Production bundle gate
+
+```bash
+./scripts/check-production-bundle.sh dist \
+  https://YOUR-PRODUCTION.convex.cloud \
+  https://YOUR-DEVELOPMENT.convex.cloud
+```
+
+Requires the exact production Convex URL and rejects localhost, the development URL, and Convex deployment credential markers before a Sites version is saved.
+
 ## Troubleshooting
 
 | Symptom | Likely cause | Correct response |
@@ -546,6 +566,10 @@ Never accept a fallback port or local-only success as proof that the published i
 ```text
 codex-sites-convex/
 ├── SKILL.md
+├── README.md
+├── changelog.md
+├── files.md
+├── task.md
 ├── agents/
 │   └── openai.yaml
 ├── assets/
@@ -563,11 +587,19 @@ codex-sites-convex/
 │   ├── convex-rules.md
 │   ├── deployment-and-qa.md
 │   └── sites-settings-and-environment.md
-└── scripts/
+├── prds/
+│   └── 2026-08-07-default-durable-publication.md
+├── scripts/
     ├── check-backend-ready.sh
     ├── check-components.sh
+    ├── check-production-bundle.sh
+    ├── check-publication-state.sh
     ├── preflight.sh
     └── verify-project.sh
+└── tests/
+    ├── fixtures/
+    │   └── registered-public-unpublished.json
+    └── test-publication-state.sh
 ```
 
 ## Requirements
@@ -581,20 +613,39 @@ codex-sites-convex/
 
 ## Recommended Convex setup
 
-Install the full current Convex plugin for Codex:
+Start with the official [Convex agent setup guide](https://www.convex.dev/agent-setup.md). Codex should run applicable setup commands itself and ask you only for approval, authentication, a UI action, or a restart.
+
+Inspect the current integration first:
+
+```bash
+codex plugin marketplace list --json
+codex plugin list --json
+```
+
+Prefer the full Convex plugin because it includes skills and MCP:
 
 ```bash
 codex plugin marketplace add get-convex/convex-codex-plugin
 codex plugin add convex@convex-codex-plugin
 ```
 
-Install current Convex project guidance:
+If the marketplace already exists, upgrade it using the exact name returned by the list command instead of adding it again. Verify afterward that the installed `convex` plugin comes from `convex-codex-plugin`. Do not install separate Convex skills or configure a duplicate MCP server when the plugin succeeds.
+
+For an existing Convex project, require both a `convex` dependency in its project-level `package.json` and either `convex/` or `convex.json`. Check the managed files before changing them:
+
+```bash
+npx convex ai-files status
+```
+
+Install or update them only when status reports missing or stale files:
 
 ```bash
 npx convex ai-files install
 ```
 
-Configure the Convex MCP server in `~/.codex/config.toml`:
+The CLI owns managed sections in `AGENTS.md`, `CLAUDE.md`, `convex.json`, generated guidance, and project skills. Do not edit those sections by hand. Read `convex/_generated/ai/guidelines.md` before changing Convex code.
+
+Only when the full plugin is unavailable, configure the Convex MCP server in `~/.codex/config.toml` while preserving existing entries:
 
 ```toml
 [mcp_servers.convex]
@@ -602,7 +653,7 @@ command = "npx"
 args = ["-y", "convex@latest", "mcp", "start"]
 ```
 
-Restart Codex after installing the plugin, skill, or MCP configuration.
+Restart Codex after installing the plugin, skill, or MCP configuration. Verify plugin listings, `npx convex ai-files status`, and MCP health where available. Report setup as partial when a restart or another action remains.
 
 ## Safeguards
 
@@ -637,6 +688,7 @@ The skill requires Codex to:
 
 ### Codex and AI tooling
 
+- [Convex agent setup guide](https://www.convex.dev/agent-setup.md)
 - [Using Codex with Convex](https://docs.convex.dev/ai/using-codex)
 - [Install the Convex plugin](https://docs.convex.dev/ai/using-codex#install-the-convex-plugin)
 - [Convex MCP server](https://docs.convex.dev/ai/convex-mcp-server)

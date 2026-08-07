@@ -1,0 +1,27 @@
+# Files
+
+- `SKILL.md` — primary Codex Sites + Convex workflow and completion contract.
+- `README.md` — installation, default publication prompt, alternative workflows, and user-facing guidance.
+- `agents/openai.yaml` — skill-picker metadata and default prompt.
+- `assets/` — Codex and Convex footer artwork for light and dark themes.
+- `references/architecture.md` — runtime ownership and Sites lifecycle contract.
+- `references/accounts-access-and-ownership.md` — developer accounts, visitor access, shared-data warnings, and consent.
+- `references/agent-mode.md` — accountless local, cloud-agent preview, and production routing.
+- `references/bootstrap.md` — project initialization and official Convex agent setup.
+- `references/built-with-footer.md` — removable light/dark-aware attribution footer.
+- `references/components.md` — official Convex component discovery and static-hosting exclusion.
+- `references/convex-doc-map.md` — official documentation routing by capability.
+- `references/convex-rules.md` — Convex implementation and review rules.
+- `references/deployment-and-qa.md` — detailed local, preview, production, publishing, access, and live-QA runbook.
+- `references/sites-settings-and-environment.md` — Sites management, hosting metadata, and environment boundaries.
+- `scripts/preflight.sh` — conservative local project and agent-setup classification.
+- `scripts/check-backend-ready.sh` — local Convex URL and generated-API readiness gate.
+- `scripts/check-components.sh` — current official Convex component discovery helper.
+- `scripts/check-production-bundle.sh` — production URL presence and local/dev/credential-marker rejection.
+- `scripts/check-publication-state.sh` — normalized Sites-state classifier and recovery instructions.
+- `scripts/verify-project.sh` — structural validation and publication registration requirement.
+- `tests/fixtures/registered-public-unpublished.json` — regression state for a public but never-deployed Site.
+- `tests/test-publication-state.sh` — recovery-classification regression test.
+- `prds/2026-08-07-default-durable-publication.md` — implementation requirements for the durable-publication default.
+- `changelog.md` — release-facing change history.
+- `task.md` — completed maintenance tasks with UTC timestamps.
