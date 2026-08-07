@@ -153,11 +153,24 @@ Before making an app public, verify product authentication and per-user Convex a
 
 ### Where to paste prompts and commands
 
-- Paste blocks labeled `text` into a Codex task.
-- Run blocks labeled `bash` in Codex's integrated terminal at the project root, the folder containing `package.json`.
+- Paste blocks labeled `text` into a Codex task. The task box accepts instructions, not direct shell input. Ask Codex to run a command for you instead of assuming that a raw command was executed.
+- Run blocks labeled `bash` in Codex's integrated terminal at the project root, usually the folder containing `package.json`.
 - Add blocks labeled `toml` to the named configuration file; do not run them as commands.
 
-Codex can run the terminal commands for you. New users can ask: `Run these commands for me one at a time and explain any approval request before continuing.` See the [integrated terminal guide](https://learn.chatgpt.com/docs/integrated-terminal) and [ChatGPT/Codex docs](https://learn.chatgpt.com/docs).
+For most users, the simplest option is to let Codex run the commands. Ask: `Run the required terminal commands for me from this project root and explain any approval, sign-in, or project-selection request before continuing.`
+
+To run commands yourself, select the terminal icon in the upper-right corner of the Codex app or press `Ctrl` plus the backtick key. The integrated terminal opens for the current project or worktree. Commands such as `npx convex dev` and the Sites development server remain running; keep each in its own terminal session, or ask Codex to manage both processes. See the [integrated terminal guide](https://learn.chatgpt.com/docs/integrated-terminal) and [ChatGPT/Codex docs](https://learn.chatgpt.com/docs).
+
+Optional manual mode:
+
+```text
+I want to run the commands myself. Show me how to open the Codex integrated
+terminal, confirm that it is using this project's root folder, and give me the
+commands in the correct order. Explain which commands exit and which development
+servers must remain running.
+```
+
+If the current task cannot access the project files or run commands, open the project in the Codex desktop app, Codex CLI, or another command-capable Codex environment. Never paste API keys, deploy keys, administrator keys, or other secrets into the task or a browser-public environment variable.
 
 ### Option 1: Install for your Codex user
 
@@ -226,7 +239,7 @@ Use the first workflow by default whenever you ask Codex to publish, deploy, sha
 3. Paste one complete prompt below into the task and send it.
 4. Let Codex run the commands in its integrated terminal. Review any approval request before accepting it.
 
-You do not need to open a separate Terminal app or type every command yourself. If you prefer to run commands manually, open Codex's integrated terminal in the same project folder and run each command exactly as shown. Read the [Codex integrated terminal guide](https://learn.chatgpt.com/docs/integrated-terminal) or browse the [ChatGPT and Codex documentation](https://learn.chatgpt.com/docs).
+You do not need to open a separate Terminal app or type every command yourself. The recommended beginner path is to ask Codex to run the commands. If you prefer to run them manually, select the terminal icon in the upper-right corner or press `Ctrl` plus the backtick key, confirm the terminal is using the same project folder, and run each command exactly as shown. A regular ChatGPT conversation should not be assumed to have command access to your computer; use a Codex task connected to the project or another command-capable Codex environment. Read the [Codex integrated terminal guide](https://learn.chatgpt.com/docs/integrated-terminal) or browse the [ChatGPT and Codex documentation](https://learn.chatgpt.com/docs).
 
 ### Default: Build and publish a durable shared Site
 

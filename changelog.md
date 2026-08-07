@@ -12,6 +12,8 @@ All notable changes to this project are documented here. This file follows [Keep
 
 ### Changed
 
+- Clarified that Codex can run routine commands for beginners, documented how to open the project-scoped integrated terminal, and added an optional manual-command mode.
+- Added capability-based fallback, long-running server, approval, and secret-handling guidance without changing deployment workflow order.
 - Added separate first-creation and existing-Site update prompts, including a beginner walkthrough for publishing later changes.
 - Made every successful handoff include the literal `$codex-sites-convex` future-update command and removed the unmatched quotation mark.
 - Required update workflows to preserve the existing Site and access policy, while redeploying Convex only when backend changes require it.
