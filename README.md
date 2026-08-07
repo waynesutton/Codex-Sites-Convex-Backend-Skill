@@ -230,6 +230,8 @@ You do not need to open a separate Terminal app or type every command yourself. 
 
 ### Default: Build and publish a durable shared Site
 
+Use this prompt when creating and publishing a Codex Site for the first time.
+
 ```text
 $codex-sites-convex Build, validate, and publish this app as a durable shared
 Codex Site backed by Convex production.
@@ -308,6 +310,51 @@ Label the result as a temporary shared preview, not production. Report the
 Convex deployment expiration, Sites access mode, visitor sign-in requirements,
 whether visitors share data, what stops working after expiration, and the exact
 steps required to promote the app to production.
+```
+
+### Update an existing published Site
+
+Use this when your Site already exists and you want to publish your latest changes. Open the same project folder you originally used. It should contain `package.json` and `.openai/hosting.json`.
+
+For a new Codex or Convex user:
+
+1. Open that project folder in Codex.
+2. Start a new task for the folder.
+3. Paste the prompt below and send it.
+4. Let Codex inspect the existing Site and Convex connection. Review any access or production-deployment approval before accepting it.
+
+```text
+$codex-sites-convex Build, validate, and publish the latest version to Codex
+Sites.
+
+Treat this as an update to the existing Site. Read project_id from
+.openai/hosting.json, call get_site, and preserve its current access policy and
+canonical current_live_url. Do not create a second Site or change its audience
+unless I explicitly request and authorize that change.
+
+Inspect what changed. If Convex backend code, schema, components, schedules,
+actions, or backend environment requirements changed, announce the exact
+production team, project, deployment, URL, and expected changes. Get my fresh
+confirmation immediately before deploying Convex production. If the backend did
+not change, confirm and reuse the existing production Convex URL without an
+unnecessary backend deployment.
+
+Build and validate the app, including the affected Convex query, mutation, and
+realtime behavior. Rebuild Sites with the exact production Convex URL and fail
+if the browser bundle contains localhost, a development deployment URL, a deploy
+key, or a backend secret.
+
+Push the exact validated source commit, save one Sites version from that commit,
+deploy it, and poll until success or failure. Require a non-null deployment URL
+and matching nonempty get_site.current_live_url. Open the live Site, complete
+HTTPS and affected read, write, and realtime QA, then return the clickable Site
+URL first and explain its current access mode.
+```
+
+Short version for routine updates:
+
+```text
+$codex-sites-convex Build, validate, and publish the latest version to Codex Sites.
 ```
 
 Codex will inspect the workspace, preserve existing architecture, check current official Convex components and documentation, implement the smallest complete product, run validation, deploy Convex first, and publish the frontend through Codex Sites.
@@ -431,7 +478,7 @@ Visitors never need Convex accounts. Developers need a Convex account only to ma
 
 The skill never makes a Site public or adds users or groups without explicit authorization. For `custom` access, it preserves the complete existing allowlist when adding users. Adding an email grants access but does not send an invitation email.
 
-For future updates, ask Codex: ‘Build, validate, and publish the latest version to Codex Sites.’
+For future updates, ask Codex: `$codex-sites-convex Build, validate, and publish the latest version to Codex Sites.`
 
 ## Convex Agent Mode and accounts
 

@@ -12,6 +12,9 @@ All notable changes to this project are documented here. This file follows [Keep
 
 ### Changed
 
+- Added separate first-creation and existing-Site update prompts, including a beginner walkthrough for publishing later changes.
+- Made every successful handoff include the literal `$codex-sites-convex` future-update command and removed the unmatched quotation mark.
+- Required update workflows to preserve the existing Site and access policy, while redeploying Convex only when backend changes require it.
 - Made “Default: Build and publish a durable shared Site” the first and default README and skill workflow for publish or share requests.
 - Required fresh target-specific Convex production consent, exact production URL configuration, exact validated source commits, Sites deployment polling, canonical live URL verification, and production read/write/realtime QA.
 - Clarified that accountless Agent Mode is local-only, does not create hosted Sites environment variables, and cannot power a published Site.

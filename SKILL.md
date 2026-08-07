@@ -10,6 +10,7 @@ Build the complete application, validate both halves, and publish it unless the 
 ## Choose the workflow
 
 - **Default: durable shared Site.** When the user asks to publish, deploy, share, ship, or provide a URL without explicitly requesting a temporary preview, use Convex Cloud production and complete the Sites lifecycle through a confirmed live `.chatgpt.site` URL.
+- **Existing Site update.** When the user asks to update, republish, or publish the latest version, preserve the existing Sites `project_id`, current access policy, and canonical `current_live_url`. Reuse the confirmed production Convex URL. Deploy Convex again only when backend code, schema, components, schedules, actions, or backend environment requirements changed; obtain fresh production consent immediately before that deployment. Always rebuild, scan, save, deploy, poll, call `get_site`, and run live QA for the new Sites version.
 - **Local-only development.** Use accountless Agent Mode only when the user explicitly wants localhost development without publishing. It creates no shareable URL.
 - **Temporary preview.** Use an isolated, expiring Convex Cloud dev deployment only when the user explicitly requests a temporary preview. Label it non-production and report its expiration.
 
@@ -223,6 +224,8 @@ The complete durable-publication lifecycle is:
 13. Open the canonical live URL and verify HTTPS plus Convex read, write, and realtime behavior through the published Site.
 14. Return the copyable clickable Sites URL as the first item in the final answer.
 
+For an existing frontend-only update, do not redeploy an unchanged Convex backend. Confirm the current production deployment and exact URL, then continue with the clean production build, bundle scan, exact source commit, Sites version save, deployment, canonical URL check, and live QA. If any Convex backend behavior or configuration changed, use the full production deployment and fresh-consent steps above.
+
 Before publishing, resolve whether the Site should be public or require sign-in. Default to private when the user has not requested public access. Explain the resolved access mode and obtain explicit authorization before changing to public or changing any access list. Public access is an access policy, not a deployment, and never proves that the Site is published.
 
 An accountless local backend cannot power a published Site. Before production deployment, confirm the intended Convex team, project, production deployment, and authorized account or production-scoped key. Obtain fresh consent immediately before every production deployment. Reject any production bundle containing localhost, `127.0.0.1`, a local URL, an unintended development deployment, or a deployment credential.
@@ -236,6 +239,10 @@ Call `save_site_version` once for the production build, then deploy that saved v
 If work stops at any point, report the last completed state using the four state names above and the single next required action. Never upgrade the wording from local, registered, or saved to published without a confirmed `get_site.current_live_url`.
 
 Every published handoff must explain how to reopen the Site in ChatGPT Sites and manage it through Settings. Hosted Site management is not available through a standalone Codex CLI or IDE screen.
+
+Every successful first-publication and update handoff must include this exact instruction:
+
+> For future updates, ask Codex: `$codex-sites-convex Build, validate, and publish the latest version to Codex Sites.`
 
 Every temporary-preview handoff must begin with the live Sites URL and label `Temporary shared preview`. Report the exact Convex deployment expiration, Sites access mode, visitor sign-in requirements, whether data is shared or isolated, what fails after expiration, and the steps required to promote to production.
 
@@ -257,4 +264,5 @@ Finish only when:
 - the handoff states Sites access, visitor sign-in, Convex backend ownership, Convex deployment type, shared versus per-user data, and future developer requirements without exposing credentials;
 - a temporary shared preview is labeled non-production and reports its exact backend expiration, failure behavior, data-sharing model, and production-promotion steps;
 - the final response starts with the published Sites URL and includes the required access and future-update handoff, or clearly states the exact remaining blocker;
+- the future-update handoff includes the literal `$codex-sites-convex` invocation so a new user reliably activates this skill;
 - every incomplete handoff names the last completed Sites state and the next required action.
