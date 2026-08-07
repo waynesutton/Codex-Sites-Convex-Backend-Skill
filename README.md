@@ -2,9 +2,9 @@
 
 Build and ship a [Codex Site](https://openai.com/academy/chatgpt-sites/) with [Convex](https://www.convex.dev/) as its realtime database and backend—using one reusable Codex skill.
 
-> **Live demo:** [Open Daymark Todo](https://daymark-todo.waynesutton.chatgpt.site/). This public demo app shares one list that updates in real time, powered by Convex and Codex Sites. All Todos are cleared every 5 minutes by a Convex cron job. [Learn how cron jobs work](https://docs.convex.dev/scheduling/cron-jobs).
-
 > **Quick start:** Install the skill, restart Codex, then prompt: `$codex-sites-convex Build and publish a durable shared realtime project tracker for my team.` Publishing or sharing uses Convex production by default and returns a live Sites URL.
+
+> **Optional live example:** [Open Daymark Todo](https://daymark-todo.waynesutton.chatgpt.site/). It demonstrates a public, shared realtime list powered by Codex Sites and Convex, with a Convex cron job that clears Todos every five minutes. [Learn how cron jobs work](https://docs.convex.dev/scheduling/cron-jobs). This demo is not required for installation or use and should not be treated as the default app architecture.
 
 ## Why this skill?
 

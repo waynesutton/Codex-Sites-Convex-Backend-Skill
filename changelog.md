@@ -12,6 +12,7 @@ All notable changes to this project are documented here. This file follows [Keep
 
 ### Changed
 
+- Moved Quick Start ahead of the optional live demo and clarified that the demo is not the default architecture.
 - Clarified that Codex can run routine commands for beginners, documented how to open the project-scoped integrated terminal, and added an optional manual-command mode.
 - Added capability-based fallback, long-running server, approval, and secret-handling guidance without changing deployment workflow order.
 - Added separate first-creation and existing-Site update prompts, including a beginner walkthrough for publishing later changes.
